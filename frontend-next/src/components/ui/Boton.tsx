@@ -85,6 +85,14 @@ export function EnlaceBoton({ href, variante = "primario", tamano = "normal", an
       </a>
     );
   }
+  if (!href.startsWith("/")) {
+    // tel:, mailto: y similares: enlace común, sin el router de Next.
+    return (
+      <a href={href} className={clases}>
+        {children}
+      </a>
+    );
+  }
   return (
     <Link href={href} className={clases}>
       {children}

@@ -2,6 +2,7 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
 import { COOKIE_TOKEN } from "@/lib/sesion";
 import type { UsuarioActual } from "@/lib/tipos";
@@ -24,15 +25,15 @@ export function apiServidor(): Api {
   return crearApi(httpServidor);
 }
 
-/** Usuario de la sesión. Si el token no sirve, al login. */
-export async function usuarioActual(): Promise<UsuarioActual> {
+/** Usuario de la sesión (una sola consulta por request aunque lo pidan el layout y la página). Si el token no sirve, al login. */
+export const usuarioActual = cache(async (): Promise<UsuarioActual> => {
   try {
     return await apiServidor().auth.me();
   } catch (e) {
     if (esApiError(e) && e.status === 401) redirect("/login?vencida=1");
     throw e;
   }
-}
+});
 
 export type Resultado<T> = { ok: true; datos: T } | { ok: false; error: string };
 
