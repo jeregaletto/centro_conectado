@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#12302A">
+  <title>Ingresar · Centro Conectado</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pared: #E6EEEB;
+      --pared-2: #D6E3DE;
+      --tinta: #12302A;
+      --tinta-suave: #4A6660;
+      --papel: #FFFFFF;
+      --borde: #9DB5AE;
+      --senal: #F5C518;
+      --error: #A4262C;
+      --ok: #0E7C66;
+      --radio: 12px;
+      --fuente: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+      --l-direccion: #1F4E8C;
+      --l-comunicacion: #6B4BA8;
+      --l-referente: #0E7C66;
+      --l-profesional: #B83A4B;
+      --l-administrativo: #C46A12;
+      --l-maestranza: #E0B400;
+      --color-rol: var(--tinta);
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background: var(--pared);
+      color: var(--tinta);
+      font: 400 17px/1.5 var(--fuente);
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid var(--senal); outline-offset: 2px; }
+
+    /* ---------- marca ---------- */
+    .marca {
+      display: flex; align-items: center; gap: 12px;
+      padding: 28px 24px 0;
+      max-width: 460px; width: 100%; margin: 0 auto;
+    }
+    .marca svg { flex: none; }
+    .marca__nombre { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.1; }
+    .marca__lugar { font-size: 15px; color: var(--tinta-suave); }
+
+    main {
+      flex: 1;
+      width: 100%; max-width: 460px; margin: 0 auto;
+      padding: 32px 24px 24px;
+    }
+    h1 { font-size: 30px; line-height: 1.15; margin: 0 0 6px; letter-spacing: -0.02em; }
+    .bajada { margin: 0 0 28px; color: var(--tinta-suave); }
+
+    /* ---------- formulario ---------- */
+    .campo { margin-bottom: 18px; }
+    .campo label { display: block; font-weight: 700; margin-bottom: 6px; }
+    .campo__ayuda { font-size: 15px; color: var(--tinta-suave); margin-top: 4px; }
+    .entrada {
+      display: flex; align-items: stretch;
+      background: var(--papel);
+      border: 2px solid var(--borde);
+      border-radius: 10px;
+      transition: border-color .15s;
+    }
+    .entrada:focus-within { border-color: var(--tinta); outline: 3px solid var(--senal); outline-offset: 1px; }
+    .entrada input {
+      flex: 1; min-width: 0;
+      border: 0; background: transparent; outline: none;
+      font: inherit; font-size: 19px; color: var(--tinta);
+      padding: 14px 14px; height: 56px;
+    }
+    .entrada--error { border-color: var(--error); }
+    .ver-clave {
+      border: 0; background: none; font: inherit; font-weight: 700; font-size: 15px;
+      color: var(--tinta); padding: 0 14px; cursor: pointer; border-radius: 0 8px 8px 0;
+    }
+    .recordar {
+      display: flex; gap: 10px; align-items: flex-start;
+      margin: 4px 0 22px; font-size: 16px; cursor: pointer;
+    }
+    .recordar input { width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--tinta); flex: none; }
+    .recordar small { display: block; color: var(--tinta-suave); font-size: 14px; }
+
+    .boton {
+      width: 100%; height: 58px;
+      border: 0; border-radius: var(--radio);
+      background: var(--tinta); color: var(--papel);
+      font: 700 19px var(--fuente);
+      cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .boton:hover { background: #0B231E; }
+    .boton[aria-busy="true"] { opacity: .85; cursor: progress; }
+    .boton--secundario { background: transparent; color: var(--tinta); border: 2px solid var(--tinta); }
+    .boton--secundario:hover { background: var(--pared-2); }
+    .girando {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 3px solid rgba(255,255,255,.35); border-top-color: #fff;
+      animation: girar .8s linear infinite;
+    }
+    @keyframes girar { to { transform: rotate(360deg); } }
+
+    .mensaje {
+      border-radius: 10px; padding: 12px 14px; margin-bottom: 18px;
+      font-size: 16px; border-left: 6px solid;
+    }
+    .mensaje--error { background: #FBE9EA; border-color: var(--error); color: #5C1216; }
+    .mensaje--info { background: #FFF7D6; border-color: var(--senal); }
+    .mensaje--ok { background: #E1F2EC; border-color: var(--ok); }
+    .mensaje[hidden] { display: none; }
+
+    .olvide { margin: 18px 0 0; font-size: 16px; color: var(--tinta-suave); }
+
+    /* ---------- líneas de piso: probar por rol ---------- */
+    .pisos { margin-top: 40px; }
+    .pisos h2 { font-size: 17px; margin: 0 0 4px; }
+    .pisos p { margin: 0 0 14px; font-size: 15px; color: var(--tinta-suave); }
+    .lineas { list-style: none; margin: 0 -24px; padding: 0; }
+    .linea {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px;
+      width: 100%; min-height: 64px;
+      padding: 10px 24px 18px;
+      border: 0; background: transparent; font: inherit; color: var(--tinta);
+      text-align: left; cursor: pointer; position: relative;
+    }
+    /* La cinta de color del piso: siempre visible, se ensancha al apuntar o enfocar */
+    .linea::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 6px;
+      height: 6px; background: var(--c);
+      transition: height .2s ease, bottom .2s ease;
+    }
+    .linea:hover::after, .linea:focus-visible::after { height: 10px; bottom: 4px; }
+    .linea:focus-visible { outline-offset: -3px; }
+    .linea__rol { display: block; font-weight: 700; line-height: 1.25; }
+    .linea__quien { display: block; font-size: 15px; color: var(--tinta-suave); }
+    .linea__tag { font-size: 15px; font-weight: 700; }
+
+    /* ---------- cambio de contraseña ---------- */
+    #panel-clave[hidden], #panel-login[hidden], #panel-vista[hidden] { display: none; }
+
+    /* ---------- vista previa por rol ---------- */
+    .vista {
+      background: var(--papel); border-radius: 20px; overflow: hidden;
+      border: 2px solid var(--pared-2);
+    }
+    .vista__cabecera {
+      background: var(--color-rol); color: #fff; padding: 20px 20px 18px;
+    }
+    .vista[data-rol="MAESTRANZA"] .vista__cabecera { color: var(--tinta); }
+    .vista__saludo { font-size: 15px; opacity: .9; }
+    .vista__nombre { font-size: 26px; font-weight: 700; line-height: 1.15; }
+    .vista__rol { font-size: 15px; margin-top: 2px; opacity: .9; }
+    .vista__cuerpo { padding: 18px 20px 8px; }
+    .vista__cuerpo h3 { font-size: 16px; margin: 0 0 10px; }
+    .puede { list-style: none; padding: 0; margin: 0 0 16px; }
+    .puede li { padding: 9px 0 9px 26px; position: relative; border-bottom: 1px solid var(--pared); font-size: 16px; }
+    .puede li::before {
+      content: ""; position: absolute; left: 4px; top: 16px; width: 10px; height: 10px;
+      border-radius: 2px; background: var(--color-rol);
+    }
+    .baldosas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .baldosa {
+      background: var(--pared); border-radius: 14px; padding: 16px 12px;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      font-weight: 700; font-size: 18px; text-align: center;
+    }
+    .baldosa svg { width: 40px; height: 40px; }
+    .barra {
+      display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+      border-top: 2px solid var(--pared); background: var(--papel);
+    }
+    .barra a {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 10px 2px 12px; font-size: 13px; text-decoration: none; color: var(--tinta-suave);
+    }
+    .barra a:first-child { color: var(--tinta); font-weight: 700; box-shadow: inset 0 3px 0 var(--color-rol); }
+    .barra svg { width: 24px; height: 24px; }
+    .vista[data-vista="SIMPLE"] .barra a { font-size: 15px; padding: 12px 2px 14px; }
+    .vista[data-vista="SIMPLE"] .barra svg { width: 30px; height: 30px; }
+    .acciones-vista { display: grid; gap: 10px; margin-top: 18px; }
+    .nota-demo { font-size: 14px; color: var(--tinta-suave); margin: 12px 0 0; }
+
+    footer {
+      max-width: 460px; width: 100%; margin: 0 auto;
+      padding: 0 24px 28px; font-size: 14px; color: var(--tinta-suave);
+    }
+
+    @media (min-width: 900px) {
+      body { background:
+        linear-gradient(90deg, var(--l-direccion) 0 8px, transparent 8px 16px, var(--l-referente) 16px 24px, transparent 24px 32px, var(--l-maestranza) 32px 40px, transparent 40px) left top / 40px 100% no-repeat,
+        var(--pared); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .linea::after { transition: none; }
+      .girando { animation-duration: 2s; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Íconos (los usa la vista previa; mismos nombres que js/sesion.js) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-casa" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></symbol>
+    <symbol id="i-calendario" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m7.5 12 3 3 6-6"/></g></symbol>
+    <symbol id="i-flechas" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-3-3M20 16H6l3 3"/></g></symbol>
+    <symbol id="i-buzon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 13V8a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v5"/><path d="M3 13h5l1.5 3h5L16 13h5v6H3z"/></g></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></g></symbol>
+  </svg>
+
+  <header class="marca">
+    <!-- Marca: tres líneas de piso que se abren hacia distintas áreas -->
+    <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">
+      <rect width="44" height="44" rx="11" fill="#12302A"/>
+      <path d="M9 34h10a6 6 0 0 0 6-6V10" fill="none" stroke="#F5C518" stroke-width="4" stroke-linecap="round"/>
+      <path d="M9 27h6a4 4 0 0 0 4-4V10" fill="none" stroke="#5FC3A8" stroke-width="4" stroke-linecap="round"/>
+      <path d="M31 10v24" fill="none" stroke="#8FB3F0" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div class="marca__nombre">Centro Conectado</div>
+      <div class="marca__lugar">[Nombre del Centro]</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ================= LOGIN ================= -->
+    <section id="panel-login" aria-labelledby="titulo-login">
+      <h1 id="titulo-login">Ingresá</h1>
+      <p class="bajada">Con tu DNI y la contraseña que te dio tu referente.</p>
+
+      <div id="msg-login" class="mensaje" role="alert" aria-live="assertive" hidden></div>
+
+      <form id="form-login" novalidate>
+        <div class="campo">
+          <label for="usuario">DNI o usuario</label>
+          <div class="entrada" id="entrada-usuario">
+            <input id="usuario" name="usuario" autocomplete="username" autocapitalize="none"
+                   spellcheck="false" inputmode="text" required maxlength="40">
+          </div>
+        </div>
+        <div class="campo">
+          <label for="password">Contraseña</label>
+          <div class="entrada" id="entrada-password">
+            <input id="password" name="password" type="password" autocomplete="current-password" required maxlength="100">
+            <button type="button" class="ver-clave" data-ver="password" aria-controls="password" aria-pressed="false">Mostrar</button>
+          </div>
+        </div>
+        <label class="recordar">
+          <input type="checkbox" id="recordar">
+          <span>Mantener la sesión en este celular
+            <small>No lo marques en la tablet de la sala de descanso.</small></span>
+        </label>
+        <button class="boton" type="submit" id="btn-ingresar">Ingresar</button>
+      </form>
+
+      <p class="olvide">¿Olvidaste la contraseña? Pedile a tu referente de sector que te la blanquee.</p>
+
+      <section class="pisos" aria-labelledby="titulo-pisos">
+        <h2 id="titulo-pisos">Probar con un rol</h2>
+        <p>Datos de demostración. Cada línea entra como una persona distinta.</p>
+        <ul class="lineas" id="lineas"></ul>
+      </section>
+    </section>
+
+    <!-- ================= PRIMER INGRESO: CAMBIAR CONTRASEÑA ================= -->
+    <section id="panel-clave" aria-labelledby="titulo-clave" hidden>
+      <h1 id="titulo-clave">Elegí tu contraseña</h1>
+      <p class="bajada">Es tu primer ingreso. La contraseña es solo tuya: no la compartas por WhatsApp.</p>
+      <div id="msg-clave" class="mensaje" role="alert" aria-live="assertive" hidden></div>
+      <form id="form-clave" novalidate>
+        <div class="campo">
+          <label for="clave-actual">Contraseña que te dieron</label>
+          <div class="entrada"><input id="clave-actual" type="password" autocomplete="current-password" required></div>
+        </div>
+        <div class="campo">
+          <label for="clave-nueva">Contraseña nueva</label>
+          <div class="entrada">
+            <input id="clave-nueva" type="password" autocomplete="new-password" required minlength="8" maxlength="100">
+            <button type="button" class="ver-clave" data-ver="clave-nueva" aria-controls="clave-nueva" aria-pressed="false">Mostrar</button>
+          </div>
+          <div class="campo__ayuda">Mínimo 8 caracteres.</div>
+        </div>
+        <button class="boton" type="submit" id="btn-clave">Guardar y entrar</button>
+      </form>
+    </section>
+
+    <!-- ================= ASÍ ENTRA CADA ROL (modo demo / vista previa) ================= -->
+    <section id="panel-vista" aria-labelledby="titulo-vista" hidden>
+      <div id="msg-vista" class="mensaje mensaje--info" hidden></div>
+      <h1 id="titulo-vista" style="font-size:24px;margin-bottom:14px">Así se ve tu app</h1>
+      <article class="vista" id="vista">
+        <div class="vista__cabecera">
+          <div class="vista__saludo" id="v-saludo"></div>
+          <div class="vista__nombre" id="v-nombre"></div>
+          <div class="vista__rol" id="v-rol"></div>
+        </div>
+        <div class="vista__cuerpo" id="v-cuerpo"></div>
+        <nav class="barra" id="v-barra" aria-label="Barra inferior de este rol"></nav>
+      </article>
+      <div class="acciones-vista">
+        <a class="boton" id="btn-continuar" href="inicio.html" style="text-decoration:none">Ir a Inicio</a>
+        <button class="boton boton--secundario" type="button" id="btn-otro-rol">Probar otro rol</button>
+      </div>
+      <p class="nota-demo" id="nota-demo"></p>
+    </section>
+  </main>
+
+  <footer>Lo oficial va por acá. WhatsApp, solo para lo urgente. Sin datos de pacientes.</footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/sesion.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    const PASSWORD_DEMO = 'Centro2026!';
+
+    /** Mismos usuarios que carga el DataSeeder del backend. */
+    const DEMO = [
+      { usuario: 'direccion',      rol: 'DIRECCION',      etiqueta: 'Dirección',              nombre: 'Laura',  apellido: 'Méndez',  puesto: 'Directora',              sector: 'Dirección' },
+      { usuario: 'comunicacion',   rol: 'COMUNICACION',   etiqueta: 'Calidad y comunicación', nombre: 'Pablo',  apellido: 'Ríos',    puesto: 'Responsable de Calidad', sector: 'Calidad y Comunicación' },
+      { usuario: 'referente.enf',  rol: 'REFERENTE',      etiqueta: 'Referente de sector',    nombre: 'Marta',  apellido: 'Gómez',   puesto: 'Jefa de Enfermería',     sector: 'Enfermería' },
+      { usuario: 'enfermero',      rol: 'PROFESIONAL',    etiqueta: 'Profesional',            nombre: 'Diego',  apellido: 'Sosa',    puesto: 'Enfermero',              sector: 'Enfermería' },
+      { usuario: 'administracion', rol: 'ADMINISTRATIVO', etiqueta: 'Administrativo',         nombre: 'Carla',  apellido: 'Núñez',   puesto: 'Administrativa',         sector: 'Administración' },
+      { usuario: 'maestranza',     rol: 'MAESTRANZA',     etiqueta: 'Maestranza',             nombre: 'Rosa',   apellido: 'Benítez', puesto: 'Auxiliar de limpieza',   sector: 'Maestranza' },
+    ];
+
+    /** Permisos por rol: espejo de Rol.java, solo para el modo demo sin servidor. */
+    const TODOS = ['PUBLICAR_GENERAL','PUBLICAR_SECTOR','VER_LECTURAS','GESTIONAR_TAREAS_GENERAL','GESTIONAR_TAREAS_SECTOR','GESTIONAR_BUZON','GESTIONAR_BIBLIOTECA','GESTIONAR_USUARIOS','VER_TODOS_LOS_PEDIDOS'];
+    const PERMISOS_DEMO = {
+      DIRECCION: TODOS, COMUNICACION: TODOS,
+      REFERENTE: ['PUBLICAR_SECTOR', 'GESTIONAR_TAREAS_SECTOR', 'VER_LECTURAS'],
+      PROFESIONAL: [], ADMINISTRATIVO: [], MAESTRANZA: [],
+    };
+
+    const QUE_PUEDE = {
+      PUBLICAR_GENERAL: 'Publicar avisos y eventos para todo el Centro',
+      PUBLICAR_SECTOR: 'Publicar avisos y eventos para tu sector',
+      VER_LECTURAS: 'Ver quién leyó cada aviso importante',
+      GESTIONAR_TAREAS_GENERAL: 'Armar el checklist de tareas de cualquier sector',
+      GESTIONAR_TAREAS_SECTOR: 'Armar el checklist de tareas de tu sector y ver el avance',
+      GESTIONAR_BUZON: 'Responder el buzón dentro de las 72 h',
+      GESTIONAR_BIBLIOTECA: 'Publicar y renovar protocolos y manuales',
+      GESTIONAR_USUARIOS: 'Dar de alta personas y asignar referentes',
+      VER_TODOS_LOS_PEDIDOS: 'Ver los pedidos entre todas las áreas',
+    };
+    const BASE_COMPLETA = [
+      'Leer y confirmar los avisos fijados',
+      'Ver la agenda y agregar eventos a tu calendario',
+      'Hacer pedidos e interconsultas a otras áreas, con plazo',
+      'Escribir al buzón, con opción anónima',
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const params = new URLSearchParams(location.search);
+    let modoDemo = false;
+    let usuarioActual = null;
+
+    // ---------- mensajes ----------
+    function mostrar(id, texto, tipo) {
+      const el = $(id);
+      el.textContent = texto;
+      el.className = 'mensaje mensaje--' + (tipo || 'error');
+      el.hidden = !texto;
+    }
+
+    if (params.get('vencida')) mostrar('msg-login', 'Tu sesión venció. Ingresá de nuevo.', 'info');
+
+    // ---------- mostrar / ocultar contraseña ----------
+    document.querySelectorAll('.ver-clave').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const input = $(btn.dataset.ver);
+        const ver = input.type === 'password';
+        input.type = ver ? 'text' : 'password';
+        btn.textContent = ver ? 'Ocultar' : 'Mostrar';
+        btn.setAttribute('aria-pressed', String(ver));
+        input.focus();
+      });
+    });
+
+    // ---------- líneas de piso ----------
+    const lineas = $('lineas');
+    DEMO.forEach((d) => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <button type="button" class="linea" style="--c:${Sesion.COLOR_ROL[d.rol]}" data-usuario="${d.usuario}">
+          <span><span class="linea__rol">${d.etiqueta}</span><span class="linea__quien">${d.nombre}, ${d.puesto.toLowerCase()}</span></span>
+          <span class="linea__tag">Entrar</span>
+        </button>`;
+      lineas.appendChild(li);
+    });
+    lineas.addEventListener('click', (e) => {
+      const btn = e.target.closest('.linea');
+      if (!btn) return;
+      $('usuario').value = btn.dataset.usuario;
+      $('password').value = PASSWORD_DEMO;
+      $('form-login').requestSubmit();
+    });
+
+    // ---------- login ----------
+    function ocupado(btn, si, texto) {
+      btn.setAttribute('aria-busy', String(si));
+      btn.disabled = si;
+      btn.innerHTML = si ? '<span class="girando" aria-hidden="true"></span>' + texto : texto;
+    }
+
+    $('form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const usuario = $('usuario').value.trim();
+      const password = $('password').value;
+      $('entrada-usuario').classList.toggle('entrada--error', !usuario);
+      $('entrada-password').classList.toggle('entrada--error', !password);
+      if (!usuario || !password) {
+        mostrar('msg-login', 'Completá tu DNI y tu contraseña.');
+        (!usuario ? $('usuario') : $('password')).focus();
+        return;
+      }
+      mostrar('msg-login', '');
+      const btn = $('btn-ingresar');
+      ocupado(btn, true, 'Ingresando');
+      try {
+        const resp = await CentroAPI.auth.login(usuario, password);
+        CentroAPI.sesion.guardar(resp, $('recordar').checked);
+        usuarioActual = resp.usuario;
+        modoDemo = false;
+        alIngresar();
+      } catch (err) {
+        const demo = DEMO.find((d) => d.usuario === usuario.toLowerCase());
+        if (err.status === 0 && demo && password === PASSWORD_DEMO) {
+          // Sin servidor (por ejemplo, la maqueta abierta sola): mostramos la vista del rol con datos locales.
+          modoDemo = true;
+          usuarioActual = {
+            ...demo, vista: demo.rol === 'MAESTRANZA' ? 'SIMPLE' : 'COMPLETA', rolEtiqueta: demo.etiqueta,
+            permisos: PERMISOS_DEMO[demo.rol], sector: { nombre: demo.sector }, debeCambiarPassword: false,
+          };
+          mostrarVista();
+        } else {
+          mostrar('msg-login', err.message || 'No pudimos ingresar. Probá de nuevo.');
+          $('password').select();
+        }
+      } finally {
+        ocupado(btn, false, 'Ingresar');
+      }
+    });
+
+    function alIngresar() {
+      if (usuarioActual.debeCambiarPassword) {
+        $('panel-login').hidden = true;
+        $('panel-clave').hidden = false;
+        $('clave-actual').focus();
+        return;
+      }
+      const volver = params.get('volver');
+      // Solo rutas relativas propias: evita redirecciones abiertas (?volver=https://sitio-malo)
+      const seguro = volver && /^[\w\-./?=&%]+$/.test(volver) && !volver.includes('//') && !volver.startsWith('login');
+      if (params.get('preview') === '1') { mostrarVista(); return; }
+      location.href = seguro ? volver : Sesion.destinoInicial(usuarioActual);
+    }
+
+    // ---------- primer ingreso ----------
+    if (params.get('cambiar') && CentroAPI.sesion.usuario()) {
+      usuarioActual = CentroAPI.sesion.usuario();
+      $('panel-login').hidden = true;
+      $('panel-clave').hidden = false;
+    }
+
+    $('form-clave').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const actual = $('clave-actual').value;
+      const nueva = $('clave-nueva').value;
+      if (nueva.length < 8) { mostrar('msg-clave', 'La contraseña nueva tiene que tener al menos 8 caracteres.'); return; }
+      const btn = $('btn-clave');
+      ocupado(btn, true, 'Guardando');
+      try {
+        usuarioActual = await CentroAPI.auth.cambiarPassword(actual, nueva);
+        CentroAPI.sesion.actualizarUsuario(usuarioActual);
+        location.href = Sesion.destinoInicial(usuarioActual);
+      } catch (err) {
+        mostrar('msg-clave', err.message);
+      } finally {
+        ocupado(btn, false, 'Guardar y entrar');
+      }
+    });
+
+    // ---------- vista previa del rol ----------
+    function mostrarVista() {
+      const u = usuarioActual;
+      const color = Sesion.COLOR_ROL[u.rol] || '#12302A';
+      document.documentElement.style.setProperty('--color-rol', color);
+      const vista = $('vista');
+      vista.dataset.rol = u.rol;
+      vista.dataset.vista = u.vista;
+
+      const h = new Date().getHours();
+      $('v-saludo').textContent = h < 13 ? 'Buen día' : h < 20 ? 'Buenas tardes' : 'Buenas noches';
+      $('v-nombre').textContent = u.nombre;
+      $('v-rol').textContent = u.puesto;
+
+      const cuerpo = $('v-cuerpo');
+      if (u.vista === 'SIMPLE') {
+        cuerpo.innerHTML = `
+          <h3>Lo tuyo de hoy</h3>
+          <div class="baldosas">
+            ${baldosa('check', 'Mis tareas')}${baldosa('casa', 'Avisos')}
+            ${baldosa('flechas', 'Pedidos')}${baldosa('buzon', 'Buzón')}
+          </div>`;
+      } else {
+        const extra = (u.permisos || []).map((p) => QUE_PUEDE[p]).filter(Boolean);
+        const items = BASE_COMPLETA.concat(extra);
+        cuerpo.innerHTML = `<h3>Con este rol podés</h3><ul class="puede">${items.map((t) => `<li>${Sesion.esc(t)}</li>`).join('')}</ul>`;
+      }
+
+      const barra = $('v-barra');
+      barra.innerHTML = Sesion.menuPara(u).map((clave) => {
+        const p = Sesion.PANTALLAS[clave];
+        return `<a href="${p.href}" tabindex="-1"><svg aria-hidden="true"><use href="#i-${p.icono}"/></svg>${p.etiqueta}</a>`;
+      }).join('');
+
+      $('btn-continuar').href = Sesion.destinoInicial(u);
+      $('btn-continuar').hidden = modoDemo;
+      $('nota-demo').textContent = modoDemo
+        ? 'Modo demostración: el servidor no está corriendo, así que esto se arma con datos locales. Con el backend levantado, este paso te lleva directo a Inicio.'
+        : 'Ya iniciaste sesión con el servidor.';
+      if (modoDemo) mostrar('msg-vista', 'Así entra ' + u.nombre + ', con rol ' + (u.rolEtiqueta || u.etiqueta).toLowerCase() + '.', 'info');
+
+      $('panel-login').hidden = true;
+      $('panel-vista').hidden = false;
+      $('btn-otro-rol').focus();
+    }
+
+    function baldosa(icono, texto) {
+      return `<div class="baldosa"><svg aria-hidden="true"><use href="#i-${icono}"/></svg>${texto}</div>`;
+    }
+
+    $('btn-otro-rol').addEventListener('click', () => {
+      CentroAPI.sesion.limpiar();
+      usuarioActual = null;
+      document.documentElement.style.removeProperty('--color-rol');
+      $('panel-vista').hidden = true;
+      $('panel-login').hidden = false;
+      $('password').value = '';
+      $('usuario').focus();
+    });
+  })();
+  </script>
+</body>
+</html>

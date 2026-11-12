@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Más · Centro Conectado</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="encabezado">
+    <div class="encabezado__fila">
+      <div class="encabezado__texto">
+        <h1 id="nombre">Más</h1>
+        <p class="encabezado__sub" id="perfil"></p>
+      </div>
+      <a class="campana" href="notificaciones.html" aria-label="Notificaciones">🔔<span class="badge" id="badge-notif" hidden>0</span></a>
+    </div>
+  </header>
+
+  <main>
+    <nav class="menu-grande" id="menu" aria-label="Más secciones"></nav>
+
+    <h2>Mi cuenta</h2>
+    <div class="menu-grande">
+      <a href="notificaciones.html"><span class="icono" aria-hidden="true">🔔</span>Notificaciones</a>
+      <a href="login.html?cambiar=1"><span class="icono" aria-hidden="true">🔑</span>Cambiar contraseña</a>
+      <button type="button" id="btn-salir"><span class="icono" aria-hidden="true">🚪</span>Cerrar sesión</button>
+    </div>
+  </main>
+
+  <nav id="barra-inferior" aria-label="Navegación principal"></nav>
+
+  <script src="js/api.js"></script>
+  <script src="js/sesion.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    const usuario = Sesion.proteger();
+    Sesion.pintarNavegacion('#barra-inferior', 'mas');
+    Sesion.iniciarContadorNotificaciones('#badge-notif');
+    const { esc } = Sesion;
+    const ICONO = { miPuesto: '✅', quien: '👥', biblioteca: '📚', publicar: '✏️', gestion: '📊', agenda: '📅' };
+    const AYUDA = { miPuesto: 'Tus tareas de hoy', quien: 'Contactos y a quién acudir', biblioteca: 'Protocolos y manuales',
+                    publicar: 'Avisos y eventos', gestion: 'Buzón, tareas y usuarios' };
+
+    document.getElementById('nombre').textContent = `${usuario.nombre} ${usuario.apellido}`;
+    document.getElementById('perfil').textContent = [usuario.rolEtiqueta, usuario.puesto, usuario.sector && usuario.sector.nombre].filter(Boolean).join(' · ');
+
+    document.getElementById('menu').innerHTML = Sesion.menuMas(usuario).map((clave) => {
+      const p = Sesion.PANTALLAS[clave];
+      return `<a href="${p.href}"><span class="icono" aria-hidden="true">${ICONO[clave] || '•'}</span>${esc(p.etiqueta)}
+        <span class="ayuda" style="font-weight:400">${AYUDA[clave] || ''}</span></a>`;
+    }).join('');
+
+    document.getElementById('btn-salir').addEventListener('click', Sesion.cerrarSesion);
+  })();
+  </script>
+</body>
+</html>

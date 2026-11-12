@@ -1,0 +1,14 @@
+package com.centroconectado.api.notificaciones;
+
+public enum TipoNotificacion {
+    AVISO_URGENTE,
+    CAMBIO_HORARIO,
+    AVISO_LECTURA_OBLIGATORIA,
+    RECORDATORIO_EVENTO,
+    PEDIDO_NUEVO,
+    PEDIDO_ACTUALIZADO,
+    BUZON_NUEVO,
+    BUZON_RESPONDIDO,
+    CONTENIDO_POR_VENCER,
+    RESUMEN_SEMANAL
+}

@@ -1,0 +1,21 @@
+# Backend
+backend/target/
+backend/data/
+*.log
+
+# Frontend Next.js
+node_modules/
+.next/
+out/
+frontend-next/test-results/
+frontend-next/playwright-report/
+frontend-next/blob-report/
+*.tsbuildinfo
+next-env.d.ts
+.env*.local
+
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

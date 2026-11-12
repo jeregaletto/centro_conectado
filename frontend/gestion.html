@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestión · Centro Conectado</title>
+  <link rel="stylesheet" href="css/app.css">
+  <style>
+    .tabla-avance { list-style: none; padding: 0; margin: 0; }
+    .tabla-avance li { background: var(--papel); border-radius: var(--radio); padding: 12px 14px; margin-bottom: 8px; }
+    .tabla-avance .avance__barra { height: 10px; margin-top: 6px; }
+    .contadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 14px; }
+    .contador { background: var(--papel); border-radius: var(--radio); padding: 12px; }
+    .contador strong { display: block; font-size: 28px; line-height: 1.1; }
+    .respuesta { background: #E3F4EF; border-radius: 10px; padding: 10px 12px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <header class="encabezado">
+    <div class="encabezado__fila">
+      <a class="volver" href="mas.html" aria-label="Volver">←</a>
+      <div class="encabezado__texto">
+        <h1>Gestión</h1>
+        <p class="encabezado__sub" id="sub"></p>
+      </div>
+      <a class="campana" href="notificaciones.html" aria-label="Notificaciones">🔔<span class="badge" id="badge-notif" hidden>0</span></a>
+    </div>
+  </header>
+
+  <main>
+    <div class="pestanas" role="tablist" aria-label="Secciones de gestión" id="pestanas"></div>
+
+    <!-- ===== Buzón ===== -->
+    <section id="sec-buzon" hidden>
+      <div class="campo">
+        <label class="sr-only" for="buzon-estado">Estado</label>
+        <select id="buzon-estado">
+          <option value="">Todos</option>
+          <option value="RECIBIDO" selected>Recibidos (sin responder)</option>
+          <option value="EN_REVISION">En revisión</option>
+          <option value="RESPONDIDO">Respondidos</option>
+          <option value="CERRADO">Cerrados</option>
+        </select>
+      </div>
+      <ul class="lista" id="buzon-lista" aria-live="polite"></ul>
+    </section>
+
+    <!-- ===== Tareas de puesto ===== -->
+    <section id="sec-tareas" hidden>
+      <div class="campo" id="tareas-sector-campo" hidden>
+        <label for="tareas-sector">Sector</label>
+        <select id="tareas-sector"></select>
+      </div>
+      <h2>Avance de hoy</h2>
+      <ul class="tabla-avance" id="avance-lista"></ul>
+
+      <h2>Checklist del sector</h2>
+      <ul class="lista" id="tareas-lista"></ul>
+      <details class="plegable">
+        <summary>➕ Agregar tarea</summary>
+        <form class="formulario" id="form-tarea" novalidate>
+          <div class="campo"><label for="t-titulo">Tarea</label><input type="text" id="t-titulo" name="titulo" required maxlength="120" placeholder="Ej: Limpiar baños planta baja"></div>
+          <div class="campo"><label for="t-descripcion">Ayuda (opcional)</label><input type="text" id="t-descripcion" name="descripcion" maxlength="500"></div>
+          <div class="fila">
+            <div class="campo"><label for="t-icono">Ícono</label><select id="t-icono" name="icono"></select></div>
+            <div class="campo"><label for="t-frecuencia">Frecuencia</label>
+              <select id="t-frecuencia" name="frecuencia"><option value="DIARIA">Todos los días</option><option value="SEMANAL">Una vez por semana</option></select></div>
+          </div>
+          <div class="fila">
+            <div class="campo"><label for="t-puesto">Solo para el puesto (opcional)</label><input type="text" id="t-puesto" name="puesto" maxlength="80" placeholder="Vacío = todo el sector"></div>
+            <div class="campo"><label for="t-orden">Orden</label><input type="number" id="t-orden" name="orden" min="0" value="0"></div>
+          </div>
+          <p id="t-error" class="mensaje-error" role="alert" hidden></p>
+          <button class="boton boton--ancho" type="submit">Agregar tarea</button>
+        </form>
+      </details>
+    </section>
+
+    <!-- ===== Tablero de pedidos ===== -->
+    <section id="sec-pedidos" hidden>
+      <div class="contadores" id="pedidos-contadores"></div>
+      <h2>Vencidos</h2>
+      <ul class="lista" id="pedidos-vencidos"></ul>
+    </section>
+
+    <!-- ===== Usuarios ===== -->
+    <section id="sec-usuarios" hidden>
+      <details class="plegable">
+        <summary>➕ Nuevo usuario</summary>
+        <form class="formulario" id="form-usuario" novalidate>
+          <div class="fila">
+            <div class="campo"><label for="u-nombre">Nombre</label><input type="text" id="u-nombre" name="nombre" required maxlength="80"></div>
+            <div class="campo"><label for="u-apellido">Apellido</label><input type="text" id="u-apellido" name="apellido" required maxlength="80"></div>
+          </div>
+          <div class="fila">
+            <div class="campo"><label for="u-usuario">Usuario o DNI</label><input type="text" id="u-usuario" name="usuario" required maxlength="40" autocomplete="off"></div>
+            <div class="campo"><label for="u-puesto">Puesto</label><input type="text" id="u-puesto" name="puesto" required maxlength="80"></div>
+          </div>
+          <div class="fila">
+            <div class="campo"><label for="u-rol">Rol</label><select id="u-rol" name="rol"></select></div>
+            <div class="campo"><label for="u-sector">Sector</label><select id="u-sector" name="sectorId"></select></div>
+          </div>
+          <div class="fila">
+            <div class="campo"><label for="u-telefono">Teléfono</label><input type="tel" id="u-telefono" name="telefono" maxlength="40"></div>
+            <div class="campo"><label for="u-interno">Interno</label><input type="text" id="u-interno" name="interno" maxlength="20"></div>
+          </div>
+          <div class="campo"><label for="u-email">Email</label><input type="email" id="u-email" name="email" maxlength="150"></div>
+          <div class="campo">
+            <label for="u-password">Contraseña inicial</label>
+            <input type="text" id="u-password" name="passwordInicial" required minlength="8" maxlength="100" autocomplete="off">
+            <p class="ayuda">Mínimo 8 caracteres. La persona la cambia en su primer ingreso.</p>
+          </div>
+          <p id="u-error" class="mensaje-error" role="alert" hidden></p>
+          <button class="boton boton--ancho" type="submit">Crear usuario</button>
+        </form>
+      </details>
+      <div class="campo"><label class="sr-only" for="u-buscar">Buscar</label><input type="search" id="u-buscar" placeholder="Buscar por nombre, usuario o sector"></div>
+      <ul class="lista" id="usuarios-lista"></ul>
+    </section>
+  </main>
+
+  <nav id="barra-inferior" aria-label="Navegación principal"></nav>
+
+  <script src="js/api.js"></script>
+  <script src="js/sesion.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    const usuario = Sesion.proteger();
+    const t = (p) => Sesion.tiene(usuario, p);
+    const SECCIONES = [
+      { id: 'buzon', titulo: 'Buzón', visible: t('GESTIONAR_BUZON'), cargar: cargarBuzon },
+      { id: 'tareas', titulo: 'Tareas', visible: t('GESTIONAR_TAREAS_GENERAL') || t('GESTIONAR_TAREAS_SECTOR'), cargar: cargarTareas },
+      { id: 'pedidos', titulo: 'Pedidos', visible: t('VER_TODOS_LOS_PEDIDOS'), cargar: cargarPedidos },
+      { id: 'usuarios', titulo: 'Usuarios', visible: t('GESTIONAR_USUARIOS'), cargar: cargarUsuarios },
+    ].filter((s) => s.visible);
+    if (!SECCIONES.length) { location.replace('inicio.html'); return; }
+
+    Sesion.pintarNavegacion('#barra-inferior', 'mas');
+    Sesion.iniciarContadorNotificaciones('#badge-notif');
+    const { esc, fmt } = Sesion;
+    const $ = (id) => document.getElementById(id);
+    const error = (texto) => `<li class="error-caja" role="alert">${esc(texto)}</li>`;
+    $('sub').textContent = `${usuario.rolEtiqueta} · ${usuario.sector ? usuario.sector.nombre : ''}`;
+
+    let sectores = [];
+    const sectoresListos = CentroAPI.directorio.sectores().then((s) => (sectores = s)).catch(() => []);
+
+    // ----- pestañas -----
+    const cargadas = new Set();
+    $('pestanas').innerHTML = SECCIONES.map((s) => `<button role="tab" data-sec="${s.id}" aria-selected="false">${s.titulo}</button>`).join('');
+    if (SECCIONES.length === 1) $('pestanas').hidden = true;
+    function mostrar(id) {
+      SECCIONES.forEach((s) => ($('sec-' + s.id).hidden = s.id !== id));
+      $('pestanas').querySelectorAll('button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.sec === id)));
+      if (!cargadas.has(id)) { cargadas.add(id); SECCIONES.find((s) => s.id === id).cargar(); }
+    }
+    $('pestanas').addEventListener('click', (e) => { const b = e.target.closest('[data-sec]'); if (b) mostrar(b.dataset.sec); });
+
+    // ================= Buzón =================
+    const ESTADO_MSJ = { RECIBIDO: 'Recibido', EN_REVISION: 'En revisión', RESPONDIDO: 'Respondido', CERRADO: 'Cerrado' };
+    const TIPO_MSJ = { CONSULTA: 'Consulta', SUGERENCIA: 'Sugerencia', RECLAMO: 'Reclamo' };
+
+    function itemMensaje(m) {
+      const abierto = m.estado === 'RECIBIDO' || m.estado === 'EN_REVISION';
+      return `
+        <li class="tarjeta ${m.vencido && abierto ? 'tarjeta--vencida' : ''}" data-msj="${m.id}">
+          <span class="chip chip--${m.estado.toLowerCase()}">${ESTADO_MSJ[m.estado]}</span>
+          <span class="chip">${TIPO_MSJ[m.tipo]}</span>
+          ${m.vencido && abierto ? '<span class="chip chip--vencido">Fuera de plazo</span>' : ''}
+          <h3>${esc(m.asunto)}</h3>
+          <p class="texto-largo">${esc(m.cuerpo)}</p>
+          <p class="meta">${m.anonimo ? 'Anónimo' : esc(m.autor || '') + (m.sector ? ' · ' + esc(m.sector) : '')} · ${fmt.fechaHora(m.creadoEn)}
+            ${abierto ? ' · Responder antes del ' + fmt.fechaHora(m.plazoRespuesta) : ''}</p>
+          ${m.respuesta ? `<div class="respuesta"><strong>Respuesta</strong><p class="texto-largo" style="margin:4px 0 0">${esc(m.respuesta)}</p></div>` : ''}
+          ${abierto ? `
+            <form class="form-respuesta" style="margin-top:12px" novalidate>
+              <label class="sr-only" for="r-${m.id}">Respuesta</label>
+              <textarea id="r-${m.id}" name="respuesta" maxlength="4000" placeholder="Escribí la respuesta" required></textarea>
+              <p class="mensaje-error" role="alert" hidden></p>
+              <div class="tarjeta__acciones">
+                <button class="boton boton--chico" type="submit">Responder</button>
+                ${m.estado === 'RECIBIDO' ? '<button class="boton boton--secundario boton--chico" type="button" data-estado="EN_REVISION">Marcar en revisión</button>' : ''}
+                <button class="boton boton--secundario boton--chico" type="button" data-estado="CERRADO">Cerrar sin responder</button>
+              </div>
+            </form>` : m.estado === 'RESPONDIDO'
+              ? '<div class="tarjeta__acciones"><button class="boton boton--secundario boton--chico" type="button" data-estado="CERRADO">Cerrar</button></div>' : ''}
+        </li>`;
+    }
+
+    async function cargarBuzon() {
+      $('buzon-lista').innerHTML = '<li class="cargando">Cargando…</li>';
+      try {
+        const msjs = await CentroAPI.buzon.gestion($('buzon-estado').value || undefined);
+        $('buzon-lista').innerHTML = msjs.length ? msjs.map(itemMensaje).join('') : '<li class="vacio">No hay mensajes en este estado. 👌</li>';
+      } catch (err) { $('buzon-lista').innerHTML = error(err.message); }
+    }
+    $('buzon-estado').addEventListener('change', cargarBuzon);
+
+    $('buzon-lista').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const li = form.closest('[data-msj]');
+      const btn = form.querySelector('[type=submit]');
+      const texto = form.respuesta.value.trim();
+      if (!texto) { Sesion.mostrarError(form.querySelector('.mensaje-error'), { message: 'Escribí la respuesta' }); return; }
+      Sesion.ocupado(btn, true);
+      try {
+        const m = await CentroAPI.buzon.responder(li.dataset.msj, texto);
+        li.outerHTML = itemMensaje(m);
+        Sesion.aviso('Respuesta enviada');
+      } catch (err) {
+        Sesion.mostrarError(form.querySelector('.mensaje-error'), err, form);
+        Sesion.ocupado(btn, false);
+      }
+    });
+    $('buzon-lista').addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-estado]');
+      if (!btn) return;
+      const li = btn.closest('[data-msj]');
+      Sesion.ocupado(btn, true);
+      try {
+        const m = await CentroAPI.buzon.cambiarEstado(li.dataset.msj, btn.dataset.estado);
+        li.outerHTML = itemMensaje(m);
+      } catch (err) { Sesion.ocupado(btn, false); Sesion.aviso(err.message, 'error'); }
+    });
+
+    // ================= Tareas de puesto =================
+    const ICONOS = { banio: '🚻 Baño', basura: '🗑️ Basura', trapeador: '🧽 Limpieza', silla: '🪑 Silla', jabon: '🧴 Jabón',
+                     ventana: '🪟 Ventana', caja: '📦 Caja', carro: '🛒 Carro', termometro: '🌡️ Temperatura', pastilla: '💊 Medicación' };
+    $('t-icono').innerHTML = Object.entries(ICONOS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+    const sectorTareas = () => (t('GESTIONAR_TAREAS_GENERAL') ? Number($('tareas-sector').value) : usuario.sector.id);
+
+    async function cargarTareas() {
+      if (t('GESTIONAR_TAREAS_GENERAL') && !$('tareas-sector').options.length) {
+        await sectoresListos;
+        $('tareas-sector-campo').hidden = false;
+        $('tareas-sector').innerHTML = sectores.map((s) => `<option value="${s.id}" ${s.codigo === 'MAESTRANZA' || /maestranza/i.test(s.nombre) ? 'selected' : ''}>${esc(s.nombre)}</option>`).join('');
+      }
+      const sectorId = sectorTareas();
+      $('avance-lista').innerHTML = '<li class="cargando">Cargando…</li>';
+      $('tareas-lista').innerHTML = '';
+      try {
+        const [avance, tareas] = await Promise.all([CentroAPI.miPuesto.avanceSector(sectorId), CentroAPI.miPuesto.tareasSector(sectorId)]);
+        const conTareas = avance.filter((a) => a.avance.total > 0);
+        $('avance-lista').innerHTML = conTareas.length ? conTareas.map((a) => `
+          <li>
+            <strong>${esc(a.usuario.nombre)}</strong> <span class="meta">· ${esc(a.usuario.puesto || '')}</span>
+            <span style="float:right;font-weight:700">${a.avance.hechas}/${a.avance.total}</span>
+            <div class="avance__barra"><div class="avance__relleno" style="width:${a.avance.porcentaje}%"></div></div>
+          </li>`).join('') : '<li class="vacio">Nadie del sector tiene tareas asignadas hoy.</li>';
+        $('tareas-lista').innerHTML = tareas.length ? tareas.map((x) => `
+          <li class="tarjeta" data-tarea="${x.id}">
+            <span class="chip">${x.frecuencia === 'SEMANAL' ? 'Semanal' : 'Diaria'}</span>
+            ${x.puesto ? `<span class="chip">${esc(x.puesto)}</span>` : ''}
+            <h3>${(ICONOS[x.icono] || '✔️').split(' ')[0]} ${esc(x.titulo)}</h3>
+            ${x.descripcion ? `<p class="meta">${esc(x.descripcion)}</p>` : ''}
+            <div class="tarjeta__acciones"><button class="boton boton--peligro boton--chico" type="button" data-quitar-tarea>Quitar</button></div>
+          </li>`).join('') : '<li class="vacio">El sector no tiene tareas. Agregá la primera abajo.</li>';
+      } catch (err) { $('avance-lista').innerHTML = error(err.message); }
+    }
+    $('tareas-sector').addEventListener('change', cargarTareas);
+
+    $('tareas-lista').addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-quitar-tarea]');
+      if (!btn) return;
+      if (btn.dataset.confirmar !== '1') { btn.dataset.confirmar = '1'; btn.textContent = '¿Seguro? Tocá de nuevo'; return; }
+      Sesion.ocupado(btn, true);
+      try { await CentroAPI.miPuesto.eliminarTarea(btn.closest('[data-tarea]').dataset.tarea); Sesion.aviso('Tarea quitada'); cargarTareas(); }
+      catch (err) { Sesion.ocupado(btn, false); Sesion.aviso(err.message, 'error'); }
+    });
+
+    $('form-tarea').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const btn = form.querySelector('[type=submit]');
+      Sesion.ocupado(btn, true);
+      try {
+        await CentroAPI.miPuesto.crearTarea({
+          sectorId: sectorTareas(),
+          puesto: $('t-puesto').value.trim() || null,
+          titulo: $('t-titulo').value.trim(),
+          descripcion: $('t-descripcion').value.trim() || null,
+          icono: $('t-icono').value,
+          frecuencia: $('t-frecuencia').value,
+          orden: Number($('t-orden').value) || 0,
+        });
+        form.reset();
+        Sesion.mostrarError($('t-error'), null, form);
+        Sesion.aviso('Tarea agregada');
+        cargarTareas();
+      } catch (err) { Sesion.mostrarError($('t-error'), err, form); }
+      finally { Sesion.ocupado(btn, false); }
+    });
+
+    // ================= Tablero de pedidos =================
+    const ESTADO_PED = { PENDIENTE: 'Pendientes', EN_CURSO: 'En curso', RESUELTO: 'Resueltos', RECHAZADO: 'Rechazados', CANCELADO: 'Cancelados' };
+    async function cargarPedidos() {
+      $('pedidos-vencidos').innerHTML = '<li class="cargando">Cargando…</li>';
+      try {
+        const todos = await CentroAPI.pedidos.todos();
+        const cuenta = {};
+        todos.forEach((p) => (cuenta[p.estado] = (cuenta[p.estado] || 0) + 1));
+        const vencidos = todos.filter((p) => p.vencido);
+        $('pedidos-contadores').innerHTML = Object.keys(ESTADO_PED).map((k) =>
+          `<div class="contador"><strong>${cuenta[k] || 0}</strong>${ESTADO_PED[k]}</div>`).join('') +
+          `<div class="contador" style="color:var(--error)"><strong>${vencidos.length}</strong>Vencidos</div>`;
+        $('pedidos-vencidos').innerHTML = vencidos.length ? vencidos.map((p) => `
+          <li><a class="tarjeta tarjeta--vencida" href="pedido.html?id=${p.id}">
+            <h3>${esc(p.asunto)}</h3>
+            <p class="meta">${esc(p.codigo)} · ${esc(p.sectorOrigen.nombre)} → ${esc(p.sectorDestino.nombre)}</p>
+            <p class="meta">⏰ Vencido hace ${Math.abs(p.horasRestantes)} h</p>
+          </a></li>`).join('') : '<li class="vacio">No hay pedidos vencidos. 👌</li>';
+      } catch (err) { $('pedidos-vencidos').innerHTML = error(err.message); }
+    }
+
+    // ================= Usuarios =================
+    const ROLES = { DIRECCION: 'Dirección', COMUNICACION: 'Calidad y comunicación', REFERENTE: 'Referente de sector',
+                    PROFESIONAL: 'Profesional', ADMINISTRATIVO: 'Administrativo', MAESTRANZA: 'Maestranza' };
+    let usuarios = [];
+    $('u-rol').innerHTML = Object.entries(ROLES)
+      .filter(([k]) => usuario.rol === 'DIRECCION' || k !== 'DIRECCION')
+      .map(([k, v]) => `<option value="${k}" ${k === 'PROFESIONAL' ? 'selected' : ''}>${v}</option>`).join('');
+
+    function itemUsuario(u) {
+      return `
+        <li class="tarjeta ${u.activo ? '' : 'tarjeta--leida'}" data-usuario="${u.id}">
+          <span class="chip">${ROLES[u.rol]}</span>
+          ${u.activo ? '' : '<span class="chip chip--cancelado">Inactivo</span>'}
+          ${u.debeCambiarPassword ? '<span class="chip chip--en_curso">Debe cambiar contraseña</span>' : ''}
+          <h3>${esc(u.nombre)} ${esc(u.apellido)}</h3>
+          <p class="meta">${esc(u.usuario)} · ${esc(u.puesto)} · ${esc(u.sector ? u.sector.nombre : '')}</p>
+          <div class="tarjeta__acciones">
+            <button class="boton boton--secundario boton--chico" type="button" data-accion="reset">Nueva contraseña</button>
+            <button class="boton ${u.activo ? 'boton--peligro' : 'boton--secundario'} boton--chico" type="button" data-accion="activo">${u.activo ? 'Desactivar' : 'Reactivar'}</button>
+          </div>
+          <div class="reset" hidden style="margin-top:10px">
+            <label class="sr-only" for="reset-${u.id}">Contraseña temporal</label>
+            <input type="text" id="reset-${u.id}" placeholder="Contraseña temporal (mín. 8)" minlength="8" autocomplete="off">
+            <button class="boton boton--chico" type="button" data-accion="reset-ok" style="margin-top:8px">Guardar</button>
+          </div>
+        </li>`;
+    }
+    function pintarUsuarios() {
+      const q = $('u-buscar').value.trim().toLowerCase();
+      const lista = usuarios.filter((u) => !q || `${u.nombre} ${u.apellido} ${u.usuario} ${u.sector ? u.sector.nombre : ''}`.toLowerCase().includes(q));
+      $('usuarios-lista').innerHTML = lista.length ? lista.map(itemUsuario).join('') : '<li class="vacio">Sin resultados.</li>';
+    }
+    async function cargarUsuarios() {
+      $('usuarios-lista').innerHTML = '<li class="cargando">Cargando…</li>';
+      await sectoresListos;
+      $('u-sector').innerHTML = sectores.map((s) => `<option value="${s.id}">${esc(s.nombre)}</option>`).join('');
+      try { usuarios = await CentroAPI.admin.usuarios(); pintarUsuarios(); }
+      catch (err) { $('usuarios-lista').innerHTML = error(err.message); }
+    }
+    $('u-buscar').addEventListener('input', pintarUsuarios);
+
+    $('usuarios-lista').addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-accion]');
+      if (!btn) return;
+      const li = btn.closest('[data-usuario]');
+      const u = usuarios.find((x) => String(x.id) === li.dataset.usuario);
+      if (btn.dataset.accion === 'reset') { li.querySelector('.reset').hidden = false; li.querySelector('.reset input').focus(); return; }
+      Sesion.ocupado(btn, true);
+      try {
+        if (btn.dataset.accion === 'reset-ok') {
+          const clave = li.querySelector('.reset input').value;
+          if (clave.length < 8) throw new Error('La contraseña temporal tiene que tener al menos 8 caracteres');
+          await CentroAPI.admin.resetPassword(u.id, clave);
+          Sesion.aviso('Contraseña cambiada. Pasásela a la persona: la cambia al entrar.');
+          li.querySelector('.reset').hidden = true;
+          Sesion.ocupado(btn, false);
+        } else {
+          const act = await CentroAPI.admin.actualizarUsuario(u.id, {
+            nombre: u.nombre, apellido: u.apellido, email: u.email, telefono: u.telefono, interno: u.interno,
+            puesto: u.puesto, rol: u.rol, sectorId: u.sector.id, activo: !u.activo,
+          });
+          usuarios = usuarios.map((x) => (x.id === act.id ? act : x));
+          li.outerHTML = itemUsuario(act);
+        }
+      } catch (err) { Sesion.ocupado(btn, false); Sesion.aviso(err.message, 'error'); }
+    });
+
+    $('form-usuario').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const btn = form.querySelector('[type=submit]');
+      Sesion.ocupado(btn, true);
+      const v = (id) => $(id).value.trim() || null;
+      try {
+        const nuevo = await CentroAPI.admin.crearUsuario({
+          usuario: v('u-usuario'), nombre: v('u-nombre'), apellido: v('u-apellido'), email: v('u-email'),
+          telefono: v('u-telefono'), interno: v('u-interno'), puesto: v('u-puesto'), rol: $('u-rol').value,
+          sectorId: Number($('u-sector').value), passwordInicial: $('u-password').value,
+        });
+        usuarios = [nuevo, ...usuarios];
+        form.reset();
+        Sesion.mostrarError($('u-error'), null, form);
+        form.closest('details').open = false;
+        pintarUsuarios();
+        Sesion.aviso(`Usuario ${nuevo.usuario} creado`);
+      } catch (err) { Sesion.mostrarError($('u-error'), err, form); }
+      finally { Sesion.ocupado(btn, false); }
+    });
+
+    // ----- arranque -----
+    const pedida = new URLSearchParams(location.search).get('seccion');
+    mostrar(SECCIONES.some((s) => s.id === pedida) ? pedida : SECCIONES[0].id);
+  })();
+  </script>
+</body>
+</html>

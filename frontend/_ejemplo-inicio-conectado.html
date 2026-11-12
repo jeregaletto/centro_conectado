@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inicio · Centro Conectado (ejemplo conectado)</title>
+  <!--
+    EJEMPLO DE REFERENCIA: muestra el patrón para conectar cualquier maqueta.
+    1) incluir js/api.js y js/sesion.js
+    2) Sesion.proteger()  → si no hay login, vuelve a login.html
+    3) pedir datos a la API y reemplazar los [placeholders] por los datos reales
+    4) los botones llaman a la API y actualizan la pantalla
+    Copiá el bloque <script> del final a tu inicio.html y adaptá los selectores a tu HTML.
+  -->
+  <style>
+    body { margin: 0; font: 17px/1.5 "Atkinson Hyperlegible", system-ui, sans-serif; background: #E6EEEB; color: #12302A; padding-bottom: 80px; }
+    header { background: var(--color-rol, #12302A); color: #fff; padding: 20px; }
+    [data-vista="SIMPLE"] body { font-size: 19px; }
+    main { padding: 16px; max-width: 520px; margin: 0 auto; }
+    h2 { font-size: 18px; margin: 20px 0 8px; }
+    .aviso { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 10px; border-left: 6px solid #F5C518; }
+    .aviso--leido { border-left-color: #9DB5AE; opacity: .8; }
+    .aviso button { margin-top: 8px; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 2px solid #12302A; background: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+    .evento, .novedad { background: #fff; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+    .vacio { color: #4A6660; }
+    #barra-inferior { position: fixed; bottom: 0; left: 0; right: 0; display: grid; grid-auto-flow: column; background: #fff; border-top: 2px solid #D6E3DE; }
+    #barra-inferior .tab { padding: 14px 4px; text-align: center; text-decoration: none; color: #4A6660; font-size: 14px; }
+    #barra-inferior .tab--activa { color: #12302A; font-weight: 700; box-shadow: inset 0 3px 0 var(--color-rol); }
+    .campana { float: right; background: #F5C518; color: #12302A; border-radius: 999px; padding: 0 9px; font-weight: 700; }
+    .salir { background: none; border: 0; color: inherit; text-decoration: underline; font: inherit; cursor: pointer; padding: 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="campana" id="badge-notif" hidden>0</span>
+    <div id="saludo">[Saludo]</div>
+    <strong id="nombre" style="font-size:24px">[Nombre]</strong>
+    <div><button class="salir" id="btn-salir" type="button">Cerrar sesión</button></div>
+  </header>
+
+  <main>
+    <section id="avance" hidden>
+      <h2>Mis tareas de hoy</h2>
+      <p id="avance-texto"></p>
+    </section>
+    <h2>Importante</h2>
+    <div id="fijados"><p class="vacio">Cargando…</p></div>
+    <h2>Agenda de hoy</h2>
+    <div id="agenda"></div>
+    <h2>Novedades</h2>
+    <div id="novedades"></div>
+  </main>
+
+  <nav id="barra-inferior" aria-label="Navegación principal"></nav>
+
+  <script src="js/api.js"></script>
+  <script src="js/sesion.js"></script>
+  <script>
+  (async function () {
+    'use strict';
+    const usuario = Sesion.proteger();               // 1) sin sesión → login.html
+    Sesion.pintarNavegacion('#barra-inferior', 'inicio');
+    Sesion.iniciarContadorNotificaciones('#badge-notif');
+    document.getElementById('btn-salir').onclick = Sesion.cerrarSesion;
+    const { esc, fmt } = Sesion;
+
+    function pintarAviso(a) {
+      return `
+        <article class="aviso ${a.leido ? 'aviso--leido' : ''}" data-id="${a.id}">
+          <strong>${esc(a.titulo)}</strong>
+          <div>${esc(a.cuerpo)}</div>
+          <small>${esc(a.autor)}, ${fmt.fecha(a.publicadoEn)}</small><br>
+          ${a.requiereLectura && !a.leido
+            ? `<button type="button" data-leido="${a.id}">Marcar como leído</button>`
+            : a.leido ? '<small>Leído</small>' : ''}
+        </article>`;
+    }
+
+    async function cargar() {
+      try {
+        const d = await CentroAPI.inicio.obtener();   // 2) un solo request para toda la pantalla
+        document.getElementById('saludo').textContent = d.saludo;
+        document.getElementById('nombre').textContent = d.nombre;
+
+        document.getElementById('fijados').innerHTML = d.fijados.length
+          ? d.fijados.map(pintarAviso).join('')
+          : '<p class="vacio">No hay avisos importantes. Todo al día.</p>';
+
+        document.getElementById('agenda').innerHTML = d.agendaHoy.length
+          ? d.agendaHoy.map((e) => `<div class="evento"><strong>${fmt.hora(e.inicio)}</strong> ${esc(e.titulo)}${e.lugar ? ', ' + esc(e.lugar) : ''}</div>`).join('')
+          : '<p class="vacio">Hoy no hay eventos.</p>';
+
+        document.getElementById('novedades').innerHTML = d.novedades.length
+          ? d.novedades.map((n) => `<div class="novedad"><strong>${esc(n.titulo)}</strong><br>${esc(n.cuerpo)}</div>`).join('')
+          : '<p class="vacio">Sin novedades esta semana.</p>';
+
+        if (d.tareasHoy) {
+          document.getElementById('avance').hidden = false;
+          document.getElementById('avance-texto').innerHTML =
+            `Hiciste ${d.tareasHoy.hechas} de ${d.tareasHoy.total}. <a href="mi-puesto.html">Ir a Mi puesto</a>`;
+        }
+      } catch (err) {
+        document.getElementById('fijados').innerHTML = `<p class="vacio">${esc(err.message)}</p>`;
+      }
+    }
+
+    // 3) acciones: delegación de eventos sobre el contenedor
+    document.getElementById('fijados').addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-leido]');
+      if (!btn) return;
+      btn.disabled = true;
+      try {
+        const actualizado = await CentroAPI.avisos.marcarLeido(btn.dataset.leido);
+        btn.closest('.aviso').outerHTML = pintarAviso(actualizado);
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'No se pudo guardar. Tocá de nuevo';
+      }
+    });
+
+    await cargar();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: centro-conectado-db
+    environment:
+      POSTGRES_DB: centro_conectado
+      POSTGRES_USER: centro
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-centro_dev_2026}
+    ports:
+      - "5432:5432"
+    volumes:
+      - centro_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U centro -d centro_conectado"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  centro_pgdata:
