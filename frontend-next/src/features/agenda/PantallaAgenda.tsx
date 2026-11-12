@@ -28,12 +28,14 @@ async function descargarIcs(id: number) {
 }
 
 interface Props {
+  /** Día de hoy en Buenos Aires, calculado por el servidor al momento del pedido. */
+  hoy: Fecha;
   desdeInicial: Fecha;
   eventosIniciales: Evento[];
   eventoResaltado: number | null;
 }
 
-export function PantallaAgenda({ desdeInicial, eventosIniciales, eventoResaltado }: Props) {
+export function PantallaAgenda({ hoy: hoyDia, desdeInicial, eventosIniciales, eventoResaltado }: Props) {
   const usuario = useUsuario();
   const avisar = useAvisos();
   const { ocupadoEn, correr } = useAccion();
@@ -55,7 +57,6 @@ export function PantallaAgenda({ desdeInicial, eventosIniciales, eventoResaltado
     const d = diaDe(e.inicio);
     porDia.set(d, [...(porDia.get(d) ?? []), e]);
   }
-  const hoyDia = hoy();
 
   return (
     <>
