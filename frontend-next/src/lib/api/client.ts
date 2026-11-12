@@ -84,6 +84,8 @@ export const httpCliente: Http = crearHttp({
   alNoAutorizado: () => {
     if (typeof window === "undefined") return;
     const volver = encodeURIComponent(window.location.pathname + window.location.search);
+    // Recarga completa a propósito: estamos fuera de React y hay que descartar todo el estado de la sesión.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.assign(`/login?vencida=1&volver=${volver}`);
   },
 });

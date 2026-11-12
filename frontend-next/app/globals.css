@@ -1,26 +1,88 @@
 @import "tailwindcss";
+@config "../tailwind.config.mts";
+
+/* Vista SIMPLE (maestranza): texto >= 19 px y objetivos táctiles >= 56 px. Uso: simple:text-xl */
+@custom-variant simple (&:where([data-vista="SIMPLE"], [data-vista="SIMPLE"] *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Paleta del login original */
+  --pared: #e6eeeb;
+  --pared-2: #d6e3de;
+  --tinta: #12302a;
+  --tinta-suave: #4a6660;
+  --papel: #ffffff;
+  --borde: #9db5ae;
+  --senal: #f5c518;
+  --error: #a4262c;
+  --error-fondo: #fbe9ea;
+  --ok: #0e7c66;
+  --ok-fondo: #e1f2ec;
+  --info: #1f4e8c;
+  --info-fondo: #e7eefb;
+  --alerta: #7a4a00;
+  --alerta-fondo: #fff3d6;
+  --radio: 12px;
+  /* La fuente la carga next/font en app/layout.tsx (--fuente-atkinson) */
+  --fuente: var(--fuente-atkinson), "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+
+  /* Líneas de piso: un color por rol */
+  --l-direccion: #1f4e8c;
+  --l-comunicacion: #6b4ba8;
+  --l-referente: #0e7c66;
+  --l-profesional: #b83a4b;
+  --l-administrativo: #c46a12;
+  --l-maestranza: #e0b400;
+
+  --color-rol: var(--tinta);
+  --texto-rol: #ffffff;
+  --toque: 48px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+[data-vista="SIMPLE"] {
+  --toque: 60px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Maestranza: el amarillo de su línea no da contraste con texto blanco, va con tinta. */
+[data-rol="MAESTRANZA"] {
+  --texto-rol: var(--tinta);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--pared);
+  color: var(--tinta);
+  font-family: var(--fuente);
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+[data-vista="SIMPLE"] {
+  font-size: 20px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--senal);
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--senal);
+  outline-offset: 1px;
+  border-color: var(--tinta);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
