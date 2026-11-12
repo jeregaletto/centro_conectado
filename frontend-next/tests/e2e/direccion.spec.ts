@@ -63,6 +63,15 @@ test.describe("direccion", () => {
     await expect(page.getByRole("heading", { name: "Historial" })).toBeVisible();
     await capturar(page, "direccion-pedidos-detalle");
 
+    // Los documentos de la biblioteca existen y se abren.
+    const docs = (await (await page.request.get("/api/proxy/biblioteca")).json()) as { url: string }[];
+    expect(docs.length).toBeGreaterThan(0);
+    for (const d of docs) {
+      const r = await page.request.get(d.url);
+      expect(r.status(), d.url).toBe(200);
+      expect(r.headers()["content-type"]).toContain("application/pdf");
+    }
+
     expect(errores, "errores de JavaScript o de red en la consola").toEqual([]);
   });
 

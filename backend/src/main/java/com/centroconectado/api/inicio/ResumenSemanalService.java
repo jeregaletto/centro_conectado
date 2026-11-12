@@ -91,7 +91,7 @@ public class ResumenSemanalService {
                 msg.append(" · ").append(r.buzonSinResponder()).append(" mensajes del buzón sin responder");
             }
             notificacionService.notificar(usuario, TipoNotificacion.RESUMEN_SEMANAL, "Resumen de la semana",
-                    msg.toString(), "inicio.html?resumen=1");
+                    msg.toString(), "/inicio");
             enviados++;
         }
         log.info("Resumen semanal enviado a {} usuarios", enviados);

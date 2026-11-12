@@ -75,6 +75,15 @@ public class NotificacionService {
         return repository.marcarTodasLeidas(usuarioId);
     }
 
+    /**
+     * Marca como leídas las notificaciones de un usuario que llevan a `link` y son de alguno de esos tipos.
+     * Ej: al leer un aviso se bajan sus notificaciones "Para leer", "Urgente" o "Cambio de horario".
+     */
+    @Transactional
+    public int marcarLeidasPorLink(Long usuarioId, String link, Collection<TipoNotificacion> tipos) {
+        return repository.marcarLeidasPorLink(usuarioId, link, tipos);
+    }
+
     private static String recortar(String texto, int max) {
         if (texto == null) {
             return "";

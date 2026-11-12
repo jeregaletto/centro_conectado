@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Prueba de punta a punta sobre H2 + datos de demo. Correla con: mvn verify
- * Si esto pasa, el backend está listo para conectar las maquetas.
+ * Si esto pasa, el backend está listo para el frontend (frontend-next).
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -116,19 +116,52 @@ class CentroConectadoApiTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("titulo", "Aviso ajeno", "cuerpo", "No debería",
                                 "tipo", "NOVEDAD", "sectorIds", List.of(kinesiologia)))))
-                .andExpect(status().isForbidden());
+                // Es un dato mal elegido, no un rol sin permiso: 400 con el error en el campo.
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos.sectorIds").value("Como referente solo podés publicar para tu sector"));
 
-        mvc.perform(post("/api/avisos").header(HttpHeaders.AUTHORIZATION, bearer(token))
+        String body = mvc.perform(post("/api/avisos").header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("titulo", "Simulacro de evacuación",
                                 "cuerpo", "Jueves 10 h", "tipo", "URGENTE", "sectorIds", List.of(enfermeria)))))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.sectores[0]").value("Enfermería"));
+                .andExpect(jsonPath("$.sectores[0]").value("Enfermería"))
+                .andExpect(jsonPath("$.autorId").isNumber())
+                .andReturn().getResponse().getContentAsString();
+        long avisoId = json.readTree(body).get("id").asLong();
 
-        // El enfermero recibió la notificación del urgente
+        // Aparece en lo que el referente administra
+        assertThat(getJson("/api/avisos/publicados", token).findValuesAsText("titulo")).contains("Simulacro de evacuación");
+
+        // El enfermero recibió la notificación del urgente, con link a la ruta del frontend
         String tokenEnfermero = login("enfermero");
+        long antes = getJson("/api/notificaciones/contador", tokenEnfermero).get("noLeidas").asLong();
         JsonNode notifs = getJson("/api/notificaciones?soloNoLeidas=true", tokenEnfermero);
         assertThat(notifs.findValuesAsText("tipo")).contains("AVISO_URGENTE");
+        assertThat(notifs.findValuesAsText("link")).contains("/inicio?aviso=" + avisoId);
+
+        // Al leer el aviso, su notificación se baja sola
+        mvc.perform(post("/api/avisos/" + avisoId + "/leido").header(HttpHeaders.AUTHORIZATION, bearer(tokenEnfermero)))
+                .andExpect(status().isOk());
+        assertThat(getJson("/api/notificaciones/contador", tokenEnfermero).get("noLeidas").asLong()).isEqualTo(antes - 1);
+        assertThat(getJson("/api/notificaciones?soloNoLeidas=true", tokenEnfermero).findValuesAsText("link"))
+                .doesNotContain("/inicio?aviso=" + avisoId);
+    }
+
+    @Test
+    void logoutInvalidaElToken() throws Exception {
+        String token = login("administracion");
+        mvc.perform(get("/api/auth/me").header(HttpHeaders.AUTHORIZATION, bearer(token))).andExpect(status().isOk());
+
+        mvc.perform(post("/api/auth/logout").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isNoContent());
+
+        // El mismo token ya no sirve aunque no haya vencido
+        mvc.perform(get("/api/auth/me").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isUnauthorized());
+        // Un login nuevo funciona
+        mvc.perform(get("/api/auth/me").header(HttpHeaders.AUTHORIZATION, bearer(login("administracion"))))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -163,6 +196,10 @@ class CentroConectadoApiTest {
 
         JsonNode recibidos = getJson("/api/pedidos/recibidos", tokenKin);
         assertThat(recibidos.findValuesAsText("asunto")).contains("Evaluación hab. 8");
+
+        // Quien pidió recibe la actualización con link a la ruta del detalle
+        assertThat(getJson("/api/notificaciones?soloNoLeidas=true", tokenEnf).findValuesAsText("link"))
+                .contains("/pedidos/" + id);
     }
 
     @Test

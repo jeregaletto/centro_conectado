@@ -55,20 +55,20 @@ public class VencimientosService {
             notificaciones.notificar(a.getAutor(), TipoNotificacion.CONTENIDO_POR_VENCER,
                     "Tu aviso vence el " + a.getVigenteHasta().format(FECHA),
                     "\"" + a.getTitulo() + "\" deja de verse si no lo renovás.",
-                    "inicio.html?aviso=" + a.getId());
+                    "/publicar?tipo=publicados");
         }
         for (Documento d : documentoRepository.findByActivoTrueAndVigenteHastaBetweenOrderByVigenteHastaAsc(ahora, limite)) {
             notificaciones.notificar(d.getPublicadoPor(), TipoNotificacion.CONTENIDO_POR_VENCER,
                     "Documento por vencer el " + d.getVigenteHasta().format(FECHA),
                     "\"" + d.getTitulo() + "\" deja de verse en la Biblioteca si no se revisa y renueva.",
-                    "biblioteca.html?id=" + d.getId());
+                    "/biblioteca?id=" + d.getId());
         }
         long buzonVencido = buzonService.vencidos();
         if (buzonVencido > 0) {
             notificaciones.notificar(audiencia.gestoresGenerales(), TipoNotificacion.BUZON_NUEVO,
                     "Buzón fuera de plazo",
                     buzonVencido + " mensajes superaron el plazo de respuesta.",
-                    "buzon.html?gestion=vencidos");
+                    "/gestion?seccion=buzon");
         }
         log.info("Control de vencimientos ejecutado");
     }

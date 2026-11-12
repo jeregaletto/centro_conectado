@@ -3,6 +3,7 @@ package com.centroconectado.api.avisos;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -28,6 +29,15 @@ import com.centroconectado.api.usuarios.dto.ContactoDto;
 
 @Service
 public class AvisoService {
+
+    /** Notificaciones que se bajan solas cuando la persona lee el aviso. */
+    private static final Set<TipoNotificacion> NOTIFICACIONES_DE_LECTURA = EnumSet.of(
+            TipoNotificacion.AVISO_LECTURA_OBLIGATORIA, TipoNotificacion.AVISO_URGENTE, TipoNotificacion.CAMBIO_HORARIO);
+
+    /** Ruta del frontend que muestra el aviso en Inicio. */
+    public static String linkDe(Long avisoId) {
+        return "/inicio?aviso=" + avisoId;
+    }
 
     private final AvisoRepository avisoRepository;
     private final LecturaAvisoRepository lecturaRepository;
@@ -103,6 +113,7 @@ public class AvisoService {
         if (!lecturaRepository.existsByAvisoIdAndUsuarioId(id, u.id())) {
             lecturaRepository.save(new LecturaAviso(a, usuarioRepository.getReferenceById(u.id()), ahora()));
         }
+        notificaciones.marcarLeidasPorLink(u.id(), linkDe(id), NOTIFICACIONES_DE_LECTURA);
         return toDto(a, true);
     }
 
@@ -141,6 +152,22 @@ public class AvisoService {
         return new LecturasDto(id, total, leidos, porcentaje, pendientes);
     }
 
+    /**
+     * Lo que la persona puede administrar: con PUBLICAR_GENERAL todos los avisos vigentes (de cualquier sector);
+     * el referente, solo los suyos. No depende del sector de quien consulta, a diferencia de listar().
+     */
+    @Transactional(readOnly = true)
+    public List<AvisoDto> publicados(UsuarioAutenticado u) {
+        LocalDateTime ahora = ahora();
+        List<Aviso> avisos = u.tiene(Permiso.PUBLICAR_GENERAL)
+                ? avisoRepository.findByActivoTrueAndVigenteHastaGreaterThanEqualOrderByPublicadoEnDesc(ahora)
+                : avisoRepository.findByActivoTrueAndAutorIdAndVigenteHastaGreaterThanEqualOrderByPublicadoEnDesc(u.id(), ahora);
+        Set<Long> leidos = avisos.isEmpty()
+                ? Set.of()
+                : lecturaRepository.findAvisoIdsLeidos(u.id(), avisos.stream().map(Aviso::getId).toList());
+        return avisos.stream().map(a -> toDto(a, leidos.contains(a.getId()))).toList();
+    }
+
     /** Para el panel de vigencias: lo mío (o todo, si soy gestor general) que vence pronto. */
     @Transactional(readOnly = true)
     public List<AvisoDto> porVencer(UsuarioAutenticado u) {
@@ -170,7 +197,7 @@ public class AvisoService {
             default -> "Para leer: ";
         };
         notificaciones.notificar(destinatarios, tipo, prefijo + a.getTitulo(), resumen(a.getCuerpo()),
-                "inicio.html?aviso=" + a.getId());
+                linkDe(a.getId()));
     }
 
     private Aviso buscar(Long id) {
@@ -195,7 +222,7 @@ public class AvisoService {
     private AvisoDto toDto(Aviso a, boolean leido) {
         List<String> sectores = a.getSectores().stream().map(Sector::getNombre).sorted().toList();
         return new AvisoDto(a.getId(), a.getTitulo(), a.getCuerpo(), a.getTipo(), a.isFijado(),
-                a.isRequiereLectura(), leido, a.getAutor().getNombreCompleto(), a.getPublicadoEn(),
+                a.isRequiereLectura(), leido, a.getAutor().getId(), a.getAutor().getNombreCompleto(), a.getPublicadoEn(),
                 a.getVigenteHasta(), vigencia.porVencer(a.getVigenteHasta()), sectores);
     }
 

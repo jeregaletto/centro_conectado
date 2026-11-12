@@ -58,4 +58,26 @@ test.describe("maestranza (vista simple, 390×844)", () => {
       await capturar(page, `maestranza${ruta.replaceAll("/", "-")}`);
     }
   });
+
+  test("cerrar sesión invalida el token en el backend", async ({ page }) => {
+    await ingresar(page, "maestranza");
+    const token = (await page.context().cookies()).find((c) => c.name === "cc_token")?.value;
+    expect(token).toBeTruthy();
+
+    // Maestranza no tiene "Más" en la barra: llega a su cuenta desde Inicio.
+    await page.getByRole("link", { name: /Mi cuenta/ }).click();
+    await page.waitForURL("**/mas");
+    await page.getByRole("button", { name: "Cerrar sesión" }).click();
+    await page.waitForURL("**/login");
+    expect((await page.context().cookies()).find((c) => c.name === "cc_token")).toBeUndefined();
+
+    // Aunque alguien hubiera copiado el token, ya no sirve.
+    const backend = process.env.BACKEND_URL ?? "http://localhost:8080";
+    const res = await page.request.get(`${backend}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+    expect(res.status()).toBe(401);
+
+    // Y sin cookie, la app vuelve al login.
+    await page.goto("/inicio");
+    await expect(page).toHaveURL(/\/login/);
+  });
 });

@@ -43,6 +43,12 @@ public class AvisoController {
         return service.listar(u, tipo, soloNoLeidos);
     }
 
+    @GetMapping("/publicados")
+    @PreAuthorize(PUEDE_PUBLICAR)
+    public List<AvisoDto> publicados(@AuthenticationPrincipal UsuarioAutenticado u) {
+        return service.publicados(u);
+    }
+
     @GetMapping("/por-vencer")
     @PreAuthorize(PUEDE_PUBLICAR)
     public List<AvisoDto> porVencer(@AuthenticationPrincipal UsuarioAutenticado u) {

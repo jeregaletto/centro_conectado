@@ -62,7 +62,7 @@ public class BuzonService {
         notificaciones.notificar(audiencia.gestoresGenerales(), TipoNotificacion.BUZON_NUEVO,
                 "Buzón: nueva " + req.tipo().name().toLowerCase(Locale.ROOT),
                 m.getAsunto() + " · Responder antes de " + plazoHoras + " h",
-                "buzon.html?gestion=" + m.getId());
+                "/gestion?seccion=buzon");
         return toDto(m, false);
     }
 
@@ -109,7 +109,7 @@ public class BuzonService {
         if (m.getAutor() != null) {
             notificaciones.notificar(m.getAutor(), TipoNotificacion.BUZON_RESPONDIDO,
                     "Respondieron tu " + m.getTipo().name().toLowerCase(Locale.ROOT), m.getAsunto(),
-                    "buzon.html?codigo=" + m.getCodigoSeguimiento());
+                    "/buzon?codigo=" + m.getCodigoSeguimiento());
         }
         return toDto(m, true);
     }

@@ -12,4 +12,6 @@ export const avisos = (http: Http) => ({
   eliminar: (id: number) => http.pedir<void>("DELETE", `/avisos/${id}`),
   lecturas: (id: number) => http.pedir<Lecturas>("GET", `/avisos/${id}/lecturas`),
   porVencer: () => http.pedir<Aviso[]>("GET", "/avisos/por-vencer"),
+  /** Lo que la persona administra: todo lo vigente con PUBLICAR_GENERAL; el referente, lo suyo. */
+  publicados: () => http.pedir<Aviso[]>("GET", "/avisos/publicados"),
 });

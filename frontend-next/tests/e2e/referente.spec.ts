@@ -62,7 +62,7 @@ test.describe("referente.enf", () => {
         sectorIds: [kinesiologia?.id],
       },
     });
-    expect(res.status()).toBe(403);
-    expect(((await res.json()) as { mensaje: string }).mensaje).toBe(SOLO_TU_SECTOR);
+    expect(res.status()).toBe(400);
+    expect(((await res.json()) as { campos: Record<string, string> }).campos.sectorIds).toBe(SOLO_TU_SECTOR);
   });
 });

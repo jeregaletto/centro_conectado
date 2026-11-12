@@ -1,5 +1,6 @@
 package com.centroconectado.api.notificaciones;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,4 +22,10 @@ public interface NotificacionRepository extends JpaRepository<Notificacion, Long
     @Modifying
     @Query("update Notificacion n set n.leida = true where n.usuario.id = :usuarioId and n.leida = false")
     int marcarTodasLeidas(@Param("usuarioId") Long usuarioId);
+
+    @Modifying
+    @Query("update Notificacion n set n.leida = true where n.usuario.id = :usuarioId and n.leida = false"
+            + " and n.link = :link and n.tipo in :tipos")
+    int marcarLeidasPorLink(@Param("usuarioId") Long usuarioId, @Param("link") String link,
+                            @Param("tipos") Collection<TipoNotificacion> tipos);
 }

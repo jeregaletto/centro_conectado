@@ -15,30 +15,25 @@ import { TarjetaAviso } from "@/features/avisos/TarjetaAviso";
 import { api } from "@/lib/api";
 import { plural } from "@/lib/etiquetas";
 import { fechaLarga, hora } from "@/lib/fechas";
-import { esDelAviso } from "@/lib/notificaciones";
 import type { Aviso, Inicio } from "@/lib/tipos";
 import { useSesion, useUsuario } from "@/stores/usuario";
 
 /**
- * Marca un aviso como leído y baja las notificaciones que hablan de ese aviso.
- * El backend no lo hace solo (ver PENDIENTES.md), así que la campanita bajaría recién al abrir Notificaciones.
+ * Marca un aviso como leído. El backend baja también sus notificaciones ("Para leer", "Urgente"...),
+ * así que después volvemos a leer el contador para que la campanita quede al día.
  */
-async function marcarAvisoLeido(id: number): Promise<{ aviso: Aviso; notificacionesLeidas: number }> {
+async function marcarAvisoLeido(id: number): Promise<{ aviso: Aviso; noLeidas: number | null }> {
   const aviso = await api.avisos.marcarLeido(id);
-  let notificacionesLeidas = 0;
-  try {
-    const pendientes = (await api.notificaciones.listar(true)).filter((n) => esDelAviso(n.link, id));
-    await Promise.all(pendientes.map((n) => api.notificaciones.marcarLeida(n.id)));
-    notificacionesLeidas = pendientes.length;
-  } catch {
-    // Si falla, el aviso igual quedó leído; la campanita se corrige en el próximo refresco.
-  }
-  return { aviso, notificacionesLeidas };
+  const noLeidas = await api.notificaciones
+    .contador()
+    .then((c) => c.noLeidas)
+    .catch(() => null); // si falla, la campanita se corrige en su próximo refresco (60 s)
+  return { aviso, noLeidas };
 }
 
 export function PantallaInicio({ inicio, avisoResaltado }: { inicio: Inicio; avisoResaltado: number | null }) {
   const usuario = useUsuario();
-  const descontar = useSesion((s) => s.descontar);
+  const setNoLeidas = useSesion((s) => s.setNoLeidas);
   const avisar = useAvisos();
   const { ocupadoEn, correr } = useAccion();
   const [fijados, setFijados] = useState(inicio.fijados);
@@ -58,7 +53,7 @@ export function PantallaInicio({ inicio, avisoResaltado }: { inicio: Inicio; avi
     const reemplazar = (lista: Aviso[]) => lista.map((a) => (a.id === id ? r.valor.aviso : a));
     setFijados(reemplazar);
     setNovedades(reemplazar);
-    if (r.valor.notificacionesLeidas > 0) descontar(r.valor.notificacionesLeidas);
+    if (r.valor.noLeidas !== null) setNoLeidas(r.valor.noLeidas);
     avisar("Listo, quedó como leído");
   }
 
@@ -145,6 +140,18 @@ export function PantallaInicio({ inicio, avisoResaltado }: { inicio: Inicio; avi
         <Seccion titulo="Novedades" id="t-novedades">
           {novedades.length ? novedades.map(aviso) : <Vacio>Sin novedades esta semana.</Vacio>}
         </Seccion>
+
+        {simple && (
+          // En la vista simple la barra no tiene "Más": desde acá se llega a la cuenta (cerrar sesión, contraseña).
+          <Tarjeta href="/mas" className="mt-6">
+            <TituloTarjeta>
+              <span className="inline-flex items-center gap-2">
+                <Icono nombre="menu" /> Mi cuenta
+              </span>
+            </TituloTarjeta>
+            <Meta>Cerrar sesión, cambiar contraseña y más</Meta>
+          </Tarjeta>
+        )}
       </Contenido>
     </>
   );

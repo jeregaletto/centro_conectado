@@ -166,7 +166,7 @@ public class AgendaService {
                         "Recordatorio: " + e.getTitulo(),
                         "Empieza a las " + e.getInicio().format(HORA)
                                 + (e.getLugar() != null ? " en " + e.getLugar() : ""),
-                        "agenda.html?evento=" + e.getId());
+                        "/agenda?evento=" + e.getId());
                 e.setRecordatorioEnviado(true);
                 enviados++;
             }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.centroconectado.api.agenda.AgendaService;
 import com.centroconectado.api.inicio.ResumenSemanalService;
+import com.centroconectado.api.security.RevocacionTokenService;
 
 @Component
 public class TareasProgramadas {
@@ -16,12 +17,14 @@ public class TareasProgramadas {
     private final AgendaService agendaService;
     private final VencimientosService vencimientosService;
     private final ResumenSemanalService resumenSemanalService;
+    private final RevocacionTokenService revocacion;
 
     public TareasProgramadas(AgendaService agendaService, VencimientosService vencimientosService,
-                             ResumenSemanalService resumenSemanalService) {
+                             ResumenSemanalService resumenSemanalService, RevocacionTokenService revocacion) {
         this.agendaService = agendaService;
         this.vencimientosService = vencimientosService;
         this.resumenSemanalService = resumenSemanalService;
+        this.revocacion = revocacion;
     }
 
     @Scheduled(fixedDelay = 60_000, initialDelay = 30_000)
@@ -32,6 +35,12 @@ public class TareasProgramadas {
     @Scheduled(cron = "0 0 7 * * *", zone = "${app.zona-horaria}")
     public void controlDeVencimientos() {
         ejecutar("vencimientos", vencimientosService::procesar);
+    }
+
+    /** Todos los días a las 3:00: borra tokens revocados que ya vencieron. */
+    @Scheduled(cron = "0 0 3 * * *", zone = "${app.zona-horaria}")
+    public void limpiarTokensRevocados() {
+        ejecutar("limpieza de tokens", revocacion::limpiarVencidos);
     }
 
     /** Lunes 8:00, hora argentina. */

@@ -13,6 +13,8 @@ public record AvisoDto(
         boolean fijado,
         boolean requiereLectura,
         boolean leido,
+        /** Id de quien publicó (para que cada referente vea lo suyo). */
+        Long autorId,
         String autor,
         LocalDateTime publicadoEn,
         LocalDateTime vigenteHasta,

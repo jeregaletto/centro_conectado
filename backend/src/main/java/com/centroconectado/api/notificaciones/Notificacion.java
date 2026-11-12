@@ -38,7 +38,7 @@ public class Notificacion {
     @Column(nullable = false, length = 1000)
     private String mensaje;
 
-    /** Ruta del frontend a la que lleva el toque, ej: "pedidos.html?id=12". */
+    /** Ruta del frontend a la que lleva el toque, ej: "/pedidos/12". */
     @Column(length = 255)
     private String link;
 

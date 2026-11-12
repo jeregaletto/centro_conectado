@@ -21,10 +21,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String PREFIJO = "Bearer ";
 
-    private final JwtService jwtService;
+    /** Atributo del request con el token validado (lo usa el logout para revocarlo). */
+    public static final String ATRIBUTO_TOKEN = "cc.token";
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    private final JwtService jwtService;
+    private final RevocacionTokenService revocacion;
+
+    public JwtAuthenticationFilter(JwtService jwtService, RevocacionTokenService revocacion) {
         this.jwtService = jwtService;
+        this.revocacion = revocacion;
     }
 
     @Override
@@ -33,7 +38,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header != null && header.startsWith(PREFIJO)) {
             try {
-                UsuarioAutenticado principal = jwtService.validar(header.substring(PREFIJO.length()).trim());
+                JwtService.TokenValidado token = jwtService.validarToken(header.substring(PREFIJO.length()).trim());
+                if (revocacion.estaRevocado(token.jti())) {
+                    throw new JwtException("Token cerrado con logout");
+                }
+                UsuarioAutenticado principal = token.principal();
+                request.setAttribute(ATRIBUTO_TOKEN, token);
                 var auth = new UsernamePasswordAuthenticationToken(principal, null, principal.authorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (JwtException | IllegalArgumentException ex) {

@@ -83,6 +83,16 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   if (!mismoOrigen(request.headers)) return error(403, MENSAJES.sinPermiso);
+  const token = request.cookies.get(COOKIE_TOKEN)?.value;
+  if (token) {
+    // El backend revoca el token: aunque alguien lo hubiera copiado, deja de valer ya.
+    // Si el backend no responde, igual borramos la cookie (el token vence solo en 12 h).
+    await fetch(`${BACKEND_URL}/api/auth/logout`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    }).catch(() => null);
+  }
   const salida = new NextResponse(null, { status: 204 });
   salida.cookies.set({ name: COOKIE_TOKEN, value: "", httpOnly: true, path: "/", maxAge: 0 });
   return salida;

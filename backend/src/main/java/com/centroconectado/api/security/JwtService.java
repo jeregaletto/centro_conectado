@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
@@ -44,6 +45,7 @@ public class JwtService {
         Instant ahora = clock.instant();
         Instant expira = ahora.plus(expiracionHoras, ChronoUnit.HOURS);
         String token = Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .subject(String.valueOf(usuario.getId()))
                 .claim(CLAIM_USUARIO, usuario.getUsuario())
                 .claim(CLAIM_ROL, usuario.getRol().name())
@@ -59,6 +61,14 @@ public class JwtService {
      * @throws JwtException si el token es inválido, está vencido o fue alterado.
      */
     public UsuarioAutenticado validar(String token) {
+        return validarToken(token).principal();
+    }
+
+    /**
+     * Como validar(), pero devuelve también el id del token (jti) y su vencimiento, para poder revocarlo.
+     * @throws JwtException si el token es inválido, está vencido o fue alterado.
+     */
+    public TokenValidado validarToken(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(key)
                 .clock(() -> Date.from(clock.instant()))
@@ -69,13 +79,20 @@ public class JwtService {
         if (!(sector instanceof Number sectorId)) {
             throw new JwtException("Token sin sector");
         }
-        return new UsuarioAutenticado(
+        UsuarioAutenticado principal = new UsuarioAutenticado(
                 Long.valueOf(claims.getSubject()),
                 claims.get(CLAIM_USUARIO, String.class),
                 Rol.valueOf(claims.get(CLAIM_ROL, String.class)),
                 sectorId.longValue());
+        if (claims.getId() == null || claims.getId().isBlank()) {
+            throw new JwtException("Token sin id");
+        }
+        return new TokenValidado(principal, claims.getId(), claims.getExpiration().toInstant());
     }
 
     public record TokenEmitido(String token, Instant expiraEn) {
+    }
+
+    public record TokenValidado(UsuarioAutenticado principal, String jti, Instant expiraEn) {
     }
 }

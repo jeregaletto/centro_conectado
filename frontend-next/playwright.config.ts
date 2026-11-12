@@ -4,7 +4,7 @@ const PUERTO = Number(process.env.PUERTO_E2E ?? 3000);
 
 /**
  * Los e2e corren contra el backend real (http://localhost:8080, perfil dev con datos de demo)
- * y contra la app ya compilada (`npm run build` antes). Ver README.
+ * y contra la app ya compilada (correr `npm run build` antes).
  * Un solo worker: los escenarios comparten la base de datos de demo.
  */
 export default defineConfig({

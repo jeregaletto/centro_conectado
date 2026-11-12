@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { esDelAviso, rutaDeLink } from "@/lib/notificaciones";
+import { rutaDeLink } from "@/lib/notificaciones";
 import { rutaSegura } from "@/lib/rutas";
 
 describe("rutaSegura (parámetro volver)", () => {
@@ -35,29 +35,21 @@ describe("rutaSegura (parámetro volver)", () => {
   });
 });
 
-describe("rutaDeLink (links de notificaciones del backend)", () => {
-  it("traduce las rutas de las maquetas viejas", () => {
-    expect(rutaDeLink("pedidos.html?id=12")).toBe("/pedidos/12");
-    expect(rutaDeLink("inicio.html?aviso=3")).toBe("/inicio?aviso=3");
-    expect(rutaDeLink("inicio.html?resumen=1")).toBe("/inicio");
-    expect(rutaDeLink("agenda.html?evento=4")).toBe("/agenda?evento=4");
-    expect(rutaDeLink("buzon.html?gestion=7")).toBe("/gestion?seccion=buzon");
-    expect(rutaDeLink("buzon.html?gestion=vencidos")).toBe("/gestion?seccion=buzon");
-    expect(rutaDeLink("buzon.html?codigo=AB12CD34EF")).toBe("/buzon?codigo=AB12CD34EF");
-    expect(rutaDeLink("biblioteca.html?id=5")).toBe("/biblioteca?id=5");
+describe("rutaDeLink (links de notificaciones)", () => {
+  it("acepta las rutas que manda el backend", () => {
+    expect(rutaDeLink("/pedidos/12")).toBe("/pedidos/12");
+    expect(rutaDeLink("/inicio?aviso=3")).toBe("/inicio?aviso=3");
+    expect(rutaDeLink("/gestion?seccion=buzon")).toBe("/gestion?seccion=buzon");
+    expect(rutaDeLink("/buzon?codigo=AB12CD34EF")).toBe("/buzon?codigo=AB12CD34EF");
+    expect(rutaDeLink("/publicar?tipo=publicados")).toBe("/publicar?tipo=publicados");
   });
 
-  it("acepta rutas nuevas y descarta lo raro", () => {
-    expect(rutaDeLink("/pedidos/3")).toBe("/pedidos/3");
-    expect(rutaDeLink("https://otro.sitio/x.html")).toBeNull();
+  it("descarta lo que no es una ruta propia", () => {
+    expect(rutaDeLink("https://otro.sitio/x")).toBeNull();
     expect(rutaDeLink("//otro.sitio")).toBeNull();
-    expect(rutaDeLink("desconocida.html")).toBeNull();
-    expect(rutaDeLink("pedidos.html?id=1;DROP")).toBe("/pedidos");
+    expect(rutaDeLink("pedidos.html?id=3")).toBeNull();
+    expect(rutaDeLink("/login")).toBeNull();
     expect(rutaDeLink(null)).toBeNull();
-  });
-
-  it("reconoce la notificación de un aviso", () => {
-    expect(esDelAviso("inicio.html?aviso=9", 9)).toBe(true);
-    expect(esDelAviso("inicio.html?aviso=19", 9)).toBe(false);
+    expect(rutaDeLink("")).toBeNull();
   });
 });

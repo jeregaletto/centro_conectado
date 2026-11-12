@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.centroconectado.api.common.exception.AccesoDenegadoException;
+import com.centroconectado.api.common.exception.CampoInvalidoException;
 import com.centroconectado.api.common.exception.RecursoNoEncontradoException;
 import com.centroconectado.api.security.UsuarioAutenticado;
 
@@ -36,7 +37,8 @@ public class AlcancePublicacionService {
         }
         if (actor.tiene(Permiso.PUBLICAR_SECTOR)) {
             if (!ids.isEmpty() && !(ids.size() == 1 && ids.get(0).equals(actor.sectorId()))) {
-                throw new AccesoDenegadoException("Como referente solo podés publicar para tu sector");
+                // Es un dato mal elegido (no un rol sin permiso): se señala en el campo sectorIds.
+                throw new CampoInvalidoException("sectorIds", "Como referente solo podés publicar para tu sector");
             }
             Sector propio = sectorRepository.findById(actor.sectorId())
                     .orElseThrow(() -> new RecursoNoEncontradoException("Sector", actor.sectorId()));

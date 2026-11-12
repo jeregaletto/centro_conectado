@@ -18,10 +18,6 @@ spring:
   jackson:
     time-zone: America/Argentina/Buenos_Aires
     default-property-inclusion: always
-  web:
-    resources:
-      # Sirve las maquetas HTML desde ../frontend: http://localhost:8080/login.html
-      static-locations: classpath:/static/,file:../frontend/
 
 server:
   port: ${PORT:8080}

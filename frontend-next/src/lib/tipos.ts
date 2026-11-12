@@ -156,6 +156,8 @@ export interface Aviso {
   fijado: boolean;
   requiereLectura: boolean;
   leido: boolean;
+  /** Id de quien publicó. */
+  autorId: number;
   autor: string;
   publicadoEn: FechaHora;
   vigenteHasta: FechaHora;
@@ -229,7 +231,7 @@ export type TipoNotificacion =
   | "CONTENIDO_POR_VENCER"
   | "RESUMEN_SEMANAL";
 
-/** NotificacionDto. `link` es una ruta de las maquetas viejas ("pedidos.html?id=3"): ver lib/notificaciones.ts */
+/** NotificacionDto. `link` es una ruta del frontend ("/pedidos/3"). */
 export interface Notificacion {
   id: number;
   tipo: TipoNotificacion;

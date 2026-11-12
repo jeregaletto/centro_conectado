@@ -118,7 +118,7 @@ public class PedidoService {
                 "Nuevo " + (req.tipo() == TipoPedido.INTERCONSULTA ? "interconsulta" : "pedido") + " de "
                         + origen.getNombre(),
                 p.getAsunto() + " · Prioridad " + prioridad.name().toLowerCase(),
-                "pedidos.html?id=" + p.getId());
+                "/pedidos/" + p.getId());
         return toDetalle(p, u);
     }
 
@@ -157,7 +157,7 @@ public class PedidoService {
                 p.getCodigo() + ": " + etiqueta(nuevo),
                 p.getAsunto() + (req.comentario() != null && !req.comentario().isBlank()
                         ? " · " + req.comentario() : ""),
-                "pedidos.html?id=" + p.getId());
+                "/pedidos/" + p.getId());
         return toDetalle(p, u);
     }
 
@@ -179,7 +179,7 @@ public class PedidoService {
         }
         notificaciones.notificar(aNotificar, TipoNotificacion.PEDIDO_ACTUALIZADO,
                 p.getCodigo() + ": nuevo comentario", actor.getNombreCompleto() + ": " + comentario.trim(),
-                "pedidos.html?id=" + p.getId());
+                "/pedidos/" + p.getId());
         return toDetalle(p, u);
     }
 

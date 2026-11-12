@@ -49,7 +49,7 @@ export function PantallaPublicar({ sectores, pestanaInicial }: { sectores: Secto
         <div id="panel-publicar" role="tabpanel">
           {pestana === "aviso" && <FormAviso sectores={sectores} alcance={alcance} alPublicar={() => setPestana("publicados")} />}
           {pestana === "evento" && <FormEvento sectores={sectores} alcance={alcance} />}
-          {pestana === "publicados" && <Publicados general={alcance.general} />}
+          {pestana === "publicados" && <Publicados />}
         </div>
       </Contenido>
     </>
@@ -253,17 +253,16 @@ function FormEvento({ sectores, alcance }: { sectores: Sector[]; alcance: Alcanc
 }
 
 /** Lo publicado: por vencer (con marca) y vigentes, con lecturas, renovar y quitar. */
-function Publicados({ general }: { general: boolean }) {
+function Publicados() {
   const usuario = useUsuario();
   const avisar = useAvisos();
   const { ocupadoEn, correr } = useAccion();
   const [lecturas, setLecturas] = useState<Record<number, Lecturas>>({});
   const [confirmar, setConfirmar] = useState<number | null>(null);
-  const nombre = `${usuario.nombre} ${usuario.apellido}`;
+  // El backend decide qué administra cada uno: todo con PUBLICAR_GENERAL, lo propio para el referente.
   const { datos, error, recargar } = useConsulta("publicados", async () => {
-    const [porVencer, vigentes] = await Promise.all([api.avisos.porVencer(), api.avisos.listar()]);
-    // El backend ya filtra "por vencer" por autor; la lista de vigentes la filtramos acá para el referente.
-    return { porVencer, vigentes: general ? vigentes : vigentes.filter((a) => a.autor === nombre) };
+    const [porVencer, vigentes] = await Promise.all([api.avisos.porVencer(), api.avisos.publicados()]);
+    return { porVencer, vigentes };
   });
   const verLecturas = tiene(usuario, "VER_LECTURAS");
 

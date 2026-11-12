@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { COOKIE_TOKEN } from "@/lib/sesion";
 
 /**
- * Proxy de Next 16 (antes `middleware.ts`, renombrado en Next 16: ver README).
+ * Proxy de Next 16 (antes se llamaba `middleware.ts`; Next 16 lo renombró a `proxy.ts`, mismo comportamiento).
  * Protege las rutas de la app: sin cookie de sesión → /login?volver=<ruta>.
  * Solo mira que la cookie exista: la autorización real la hace el backend en cada llamada,
  * y si el token venció el layout protegido manda al login.

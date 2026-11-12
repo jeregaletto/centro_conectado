@@ -22,6 +22,7 @@ import com.centroconectado.api.security.JwtAuthenticationFilter;
 import com.centroconectado.api.security.JwtService;
 import com.centroconectado.api.security.RestAccessDeniedHandler;
 import com.centroconectado.api.security.RestAuthenticationEntryPoint;
+import com.centroconectado.api.security.RevocacionTokenService;
 
 @Configuration
 @EnableMethodSecurity
@@ -30,6 +31,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    JwtService jwtService,
+                                                   RevocacionTokenService revocacion,
                                                    RestAuthenticationEntryPoint entryPoint,
                                                    RestAccessDeniedHandler accessDeniedHandler) throws Exception {
         http
@@ -44,9 +46,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health").permitAll()
                         .requestMatchers("/api/**").authenticated()
-                        // Todo lo demás son las maquetas estáticas (HTML/CSS/JS).
+                        // Fuera de /api no hay nada propio (el frontend es la app Next.js): queda 404.
                         .anyRequest().permitAll())
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService, revocacion), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

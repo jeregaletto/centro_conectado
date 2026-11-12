@@ -18,6 +18,13 @@ public interface AvisoRepository extends JpaRepository<Aviso, Long> {
             """)
     List<Aviso> findVisibles(@Param("sectorId") Long sectorId, @Param("ahora") LocalDateTime ahora);
 
+    /** Vigentes de cualquier sector (para quien publica para todo el Centro). */
+    List<Aviso> findByActivoTrueAndVigenteHastaGreaterThanEqualOrderByPublicadoEnDesc(LocalDateTime ahora);
+
+    /** Vigentes que publicó una persona. */
+    List<Aviso> findByActivoTrueAndAutorIdAndVigenteHastaGreaterThanEqualOrderByPublicadoEnDesc(Long autorId,
+                                                                                                LocalDateTime ahora);
+
     List<Aviso> findByActivoTrueAndVigenteHastaBetweenOrderByVigenteHastaAsc(LocalDateTime desde,
                                                                               LocalDateTime hasta);
 }

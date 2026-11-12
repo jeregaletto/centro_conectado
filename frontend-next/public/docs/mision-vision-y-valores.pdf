@@ -1,0 +1,48 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 409 >>
+stream
+BT
+/F2 22 Tf 1 0 0 1 60 770 Tm (MisiÛn, visiÛn y valores) Tj
+/F1 13 Tf 1 0 0 1 60 734 Tm () Tj
+/F1 12 Tf 1 0 0 1 60 707 Tm () Tj
+/F1 12 Tf 1 0 0 1 60 681 Tm (Documento de demostraciÛn \(datos de prueba de Centro Conectado\).) Tj
+/F1 12 Tf 1 0 0 1 60 655 Tm (Reemplazalo por la versiÛn oficial del Centro desde Biblioteca > Editar,) Tj
+/F1 12 Tf 1 0 0 1 60 629 Tm (cargando el enlace al documento real.) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+7 0 obj
+<< /Title (MisiÛn, visiÛn y valores) /Producer (Centro Conectado) >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000257 00000 n 
+0000000716 00000 n 
+0000000813 00000 n 
+0000000915 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R /Info 7 0 R >>
+startxref
+999
+%%EOF
